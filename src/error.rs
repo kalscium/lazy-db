@@ -30,7 +30,7 @@ impl fmt::Display for LDBError {
 
 impl Error for LDBError {}
 
-pub trait CapErrHandler {
+pub trait LDBHandler {
     /// Initialises handler object for easier passing between functions
     fn init() -> Self where Self: Sized;
 
@@ -38,12 +38,12 @@ pub trait CapErrHandler {
     fn runtime<T>(&self, error: LDBError, context: &LDBErrContext, retry: Option<&dyn Fn() -> Result<T, LDBError>>) -> T;
 }
 
-pub(crate) struct ErrHandler<'a, T: CapErrHandler> {
+pub(crate) struct ErrHandler<'a, T: LDBHandler> {
     handler: T,
     context: LDBErrContext<'a>,
 }
 
-impl<'a, T: CapErrHandler> ErrHandler<'a, T> {
+impl<'a, T: LDBHandler> ErrHandler<'a, T> {
     pub fn new(handler: T, context: LDBErrContext<'a>) -> Self {
         Self {
             handler,
@@ -67,10 +67,10 @@ macro_rules! handler {
             #[inline]
             fn clone(&self) -> Self { Self::init() }
         }
-        impl $crate::error::CapErrHandler for MyCapErrHandler {
+        impl $crate::error::LDBErrorHandler for MyCapErrHandler {
             #[inline]
             fn init() -> Self { Self }
-            fn runtime<T>(&self, error: $crate::error::CapError, context: &CapErrContext, retry: Option<&dyn Fn() -> Result<T, $crate::error::CapError>>) -> T {
+            fn runtime<T>(&self, error: $crate::error::LDBError, context: &$crate::error::LDBErrorContext, retry: Option<&dyn Fn() -> Result<T, $crate::error::LDBError>>) -> T {
                 match (error, context, retry) {
                     $($pattern => $result),*
                 }

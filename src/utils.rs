@@ -19,7 +19,7 @@ macro_rules! unwrap_result {
     }}
 }
 
-pub fn compress_file(file_path: &str, out_path: &str, compression_level: i32, buff_size: usize, handler: impl CapErrHandler) {
+pub fn compress_file(file_path: &str, out_path: &str, compression_level: i32, buff_size: usize, handler: impl LDBHandler) {
     let handler = ErrHandler::new(handler, LDBErrContext::WhileZippingFile(file_path));
 
     let mut file = handle!((handler) File::open(file_path) => LDBError::IOError);
@@ -37,7 +37,7 @@ pub fn compress_file(file_path: &str, out_path: &str, compression_level: i32, bu
     handle!((handler) (encoder.finish()) => LDBError::IOError);
 }
 
-pub fn build_tarball(path: &str, out_path: &str, handler: impl CapErrHandler) {
+pub fn build_tarball(path: &str, out_path: &str, handler: impl LDBHandler) {
     let handler = ErrHandler::new(handler, LDBErrContext::WhileBuildingTarBall(path));
 
     let tarball = handle!((handler) File::create(out_path) => LDBError::IOError);
@@ -51,7 +51,7 @@ pub fn build_tarball(path: &str, out_path: &str, handler: impl CapErrHandler) {
     }
 }
 
-pub fn compress(string_path: &str, out_path: &str, compression_level: i32, buff_size: usize, raw_handler: impl CapErrHandler + Copy) {
+pub fn compress(string_path: &str, out_path: &str, compression_level: i32, buff_size: usize, raw_handler: impl LDBHandler + Copy) {
     let handler = ErrHandler::new(raw_handler, LDBErrContext::WhileZipping(string_path));
 
     let path = Path::new(string_path);
