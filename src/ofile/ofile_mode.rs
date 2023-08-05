@@ -1,5 +1,6 @@
 use std::fs::File;
 use std::io::{BufReader, BufWriter, Read, Write};
+use std::path::Path;
 use super::*;
 
 pub enum OFileMode {
@@ -19,10 +20,10 @@ impl OFileMode {
         OFileMode::Write(BufWriter::new(file))
     }
 
-    pub(super) fn modify_from_read<'a>(read_file_path: &str, idx: &u64) -> Result<OFileMode, OFileError<'a>> {
+    pub(super) fn modify_from_read<'a>(read_file_path: &Path, idx: &u64) -> Result<OFileMode, OFileError<'a>> {
         let read_file = unwrap_result!(File::open(read_file_path) => |e| Err(OFileError::IOError(e)));
         let mut reader = BufReader::new(read_file);
-        let mut writer = BufWriter::new( unwrap_result!(File::create(format!("{read_file_path}.new")) => |e| Err(OFileError::IOError(e))) );
+        let mut writer = BufWriter::new( unwrap_result!(File::create(read_file_path.with_extension("new")) => |e| Err(OFileError::IOError(e))) );
         let mut past = Option::<u8>::None;
         
         for _ in 0..*idx {

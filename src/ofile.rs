@@ -6,10 +6,11 @@ pub use ofile_mode::*;
 use std::path::Path;
 use crate::unwrap_result;
 use std::fs::{self, File};
+use std::path::PathBuf;
 use std::io::{BufReader, BufWriter, Read, Write};
 
 pub struct OFile {
-    file_path: String,
+    file_path: PathBuf,
     mode: OFileMode,
     current: Option<u8>,
     idx: u64,
@@ -22,20 +23,20 @@ impl OFile {
         } else { Self::new_write(file_path) }
     }
 
-    fn new_write<'a>(file_path: String) -> Result<Self, OFileError<'a>> {
+    fn new_write<'a>(file_path: impl AsRef<Path>) -> Result<Self, OFileError<'a>> {
         let file = unwrap_result!(File::create(&file_path) => |e| Err(OFileError::IOError(e)));
         Ok(Self {
-            file_path,
+            file_path: file_path.as_ref().to_path_buf(),
             mode: OFileMode::new_write(file),
             idx: 0,
             current: None,
         })
     }
 
-    fn new_read<'a>(file_path: String) -> Result<Self, OFileError<'a>> {
+    fn new_read<'a>(file_path: impl AsRef<Path>) -> Result<Self, OFileError<'a>> {
         let file = unwrap_result!(File::open(&file_path) => |e| Err(OFileError::IOError(e)));
         Ok(Self {
-            file_path,
+            file_path: file_path.as_ref().to_path_buf(),
             mode: OFileMode::new_read(file),
             idx: 0,
             current: None,
@@ -46,7 +47,7 @@ impl OFile {
         let reader: &mut BufReader<File> = match &mut self.mode {
             OFileMode::Read(r) => r,
             OFileMode::Modify(r, _) => r,
-            OFileMode::Write(_) => return Err(OFileError::CannotReadFile(&self.file_path))
+            OFileMode::Write(_) => return Err(OFileError::CannotReadFile(self.file_path.to_str().unwrap()))
         };
         
         let mut bytes = [0u8];
@@ -130,9 +131,9 @@ impl OFile {
 
         // if mode is modify, rename old file to `<file>.old`, new file to `<file>` and delete the old file
         if let OFileMode::Modify(_, _) = self.mode {
-            let old_path = format!("{}.old", self.file_path);
+            let old_path = self.file_path.with_extension("old");
             unwrap_result!(fs::rename(&self.file_path, &old_path) => |e| Err(OFileError::IOError(e)));
-            unwrap_result!(fs::rename(format!("{}.new", self.file_path), &self.file_path) => |e| Err(OFileError::IOError(e)));
+            unwrap_result!(fs::rename(self.file_path.with_extension("new"), &self.file_path) => |e| Err(OFileError::IOError(e)));
             unwrap_result!(fs::remove_file(old_path) => |e| Err(OFileError::IOError(e)));
         }
 
