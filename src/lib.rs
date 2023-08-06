@@ -8,3 +8,11 @@ pub use crate::{
     error::{LDBErrContext, LDBError, LDBHandler},
     lazy_type::*,
 };
+
+#[macro_export]
+macro_rules! const_eval {
+    (($type:ty) $code:expr) => {{
+        const RESULT: $type = $code;
+        RESULT
+    }};
+}
