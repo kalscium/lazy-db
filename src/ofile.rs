@@ -17,8 +17,8 @@ pub struct OFile {
 }
 
 impl OFile {
-    pub fn new<'a>(file_path: String) -> Result<Self, OFileError<'a>> {
-        if Path::new(&file_path).exists() {
+    pub fn new<'a>(file_path: impl AsRef<Path>) -> Result<Self, OFileError<'a>> {
+        if file_path.as_ref().exists() {
             Self::new_read(file_path)
         } else { Self::new_write(file_path) }
     }
