@@ -10,10 +10,10 @@ use std::path::PathBuf;
 use std::io::{BufReader, BufWriter, Read, Write};
 
 pub struct OFile {
-    file_path: PathBuf,
-    mode: OFileMode,
-    current: Option<u8>,
-    idx: u64,
+    pub file_path: PathBuf,
+    pub mode: OFileMode,
+    pub current: Option<u8>,
+    pub idx: u64,
 }
 
 impl OFile {
