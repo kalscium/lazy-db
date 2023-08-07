@@ -45,8 +45,9 @@ impl LazyType {
             Custom(x) => [1, x],
             String => [2, 0],
             INum(x) => [3, x.to_byte()],
-            UNum(x) => [3, x.to_byte()],
-            Float(x) => [4, x.to_byte()],
+            UNum(x) => [4, x.to_byte()],
+            Float(x) => [5, x.to_byte()],
+            Binary => [6, 0],
         }
     }
 }
@@ -100,6 +101,7 @@ impl LazyType {
             [3, x] => INum(LazyINumType::from_byte(x)?),
             [4, x] => UNum(LazyUNumType::from_byte(x)?),
             [5, x] => Float(LazyFloatType::from_byte(x)?),
+            [6, _] => Binary,
             [x, _] => return Err(LDBError::InvalidLazyType(x)),
         })
     }

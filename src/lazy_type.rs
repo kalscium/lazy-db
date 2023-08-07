@@ -14,4 +14,5 @@ pub enum LazyType {
     INum(LazyINumType),
     UNum(LazyUNumType),
     Float(LazyFloatType),
+    Binary,
 }
