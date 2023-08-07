@@ -15,6 +15,7 @@ pub enum LDBError {
     IOError(std::io::Error),
     WalkDirError(walkdir::Error),
     FileNotFound(String),
+    InvalidLazyType(u8),
 }
 
 impl fmt::Display for LDBError {
@@ -24,6 +25,7 @@ impl fmt::Display for LDBError {
             FileNotFound(p) => write!(f, "File '{p}' not found"),
             IOError(e) => write!(f, "IO Error: {:?}", e),
             WalkDirError(e) => write!(f, "WalkDir Error: {:?}", e),
+            InvalidLazyType(t) => write!(f, "Invalid Lazy Type {t}"),
         }
     }
 }
