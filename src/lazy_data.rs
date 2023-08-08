@@ -1,6 +1,18 @@
+mod reading;
+mod writing;
+
+pub use reading::*;
+pub use writing::*;
+
 use std::path::{Path, PathBuf};
 use std::io::Read;
 use crate::*;
+
+pub enum ActiveData {
+    SignedNum(LazyINumType, i64),
+    UnsignedNum(LazyINumType, u64),
+    Float(LazyFloatType, f64),
+}
 
 pub struct LazyData {
     pub path: PathBuf,
@@ -9,10 +21,6 @@ pub struct LazyData {
 }
 
 impl LazyData {
-    /// Creates a new `LazyData` file with the type of `LazyType::Void`
-    #[inline]
-    pub fn new_void(path: impl AsRef<Path>) -> Result<(), LDBError> { Self::uninit(path)?; Ok(()) }
-
     /// Creates an uninitialised `LazyData` file with the default type of `LazyType::Void`
     fn uninit(path: impl AsRef<Path>) -> Result<Self, LDBError> {
         let path = path.as_ref();
@@ -55,17 +63,5 @@ impl LazyData {
             lazy_type: LazyType::from_bytes(lazy_type)?,
             ofile,
         })
-    }
-
-    /// ### **Lazy Action**
-    /// ( Only returns internal ofile field of `Lazy Data` )
-    /// 
-    /// ---
-    /// Collects the `LazyData` as a Lazy `OFile`.
-    /// 
-    /// Returns `LDBError::IncorrectType` if the LazyData type is not `LazyType::Binary`
-    pub fn collect_ofile(self) -> Result<OFile, LDBError> {
-        if self.lazy_type != LazyType::Binary { return Err(LDBError::IncorrectType(self.lazy_type, LazyType::Binary)) }
-        Ok(self.ofile)
     }
 }
