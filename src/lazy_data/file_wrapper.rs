@@ -1,5 +1,3 @@
-use super::*;
-
 use std::io::{Read, Write, BufReader, BufWriter, Error};
 use std::fs::File;
 
@@ -47,5 +45,14 @@ impl FileWrapper {
             Self::Writer(mut w) => w.flush()?,
         };
         Ok(())
+    }
+
+    /// Reads to the end of the file (consumes wrapper)
+    pub fn read_to_end(mut self) -> Result<Box<[u8]>, Error> {
+        let mut reader = if let Self::Reader(r) = self { r }
+            else { panic!("You cannot read on a writer") }; // Change later to use better error handling
+        let mut buffer = Vec::new();
+        reader.read_to_end(&mut buffer)?;
+        Ok(buffer.into_boxed_slice())
     }
 }
