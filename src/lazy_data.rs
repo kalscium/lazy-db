@@ -5,7 +5,7 @@ use crate::*;
 pub struct LazyData {
     pub path: PathBuf,
     pub lazy_type: LazyType,
-    pub ofile: OFile,
+    ofile: OFile,
 }
 
 impl LazyData {
@@ -24,6 +24,7 @@ impl LazyData {
         };
 
         // read type
+        // keeps idx at zero so avoid others from reading file type again
         let mut lazy_type = [0u8; 2];
         let reader = if let OFileMode::Read(r) = &mut ofile.mode { r } else { panic!("Shouldn't panic as ofile hasn't been modified till this point") };
         unwrap_result!(reader.read(&mut lazy_type) => |e| Err(LDBError::IOError(e)));
@@ -33,5 +34,14 @@ impl LazyData {
             lazy_type: LazyType::from_bytes(lazy_type)?,
             ofile,
         })
+    }
+
+    /// ### **Lazy Action**
+    /// ( Only returns internal ofile field of `Lazy Data` )
+    /// 
+    /// ---
+    /// Collects the `LazyData` as a Lazy `OFile`.
+    pub fn collect_ofile(self) -> OFile {
+        self.ofile
     }
 }
