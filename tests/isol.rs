@@ -34,7 +34,7 @@ impl TmpPath {
 
 impl Display for TmpPath {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}",  self.0.to_string_lossy().to_string())
+        write!(f, "{}",  self.0.to_string_lossy())
     }
 }
 
