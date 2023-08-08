@@ -1,5 +1,5 @@
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::fmt::Display;
 use std::fmt;
 
@@ -14,23 +14,23 @@ pub fn new_env() -> TmpPath {
     unsafe { TmpPath::new(format!("./test_tmp/{UID}")) }
 }
 
-pub struct TmpPath(String);
+pub struct TmpPath(PathBuf);
 
 impl TmpPath {
-    pub fn new(path: String) -> Self {
-        let path_link = Path::new(&path);
-        if !path_link.exists() {
-            match fs::create_dir_all(path_link) {
+    pub fn new(path: impl AsRef<Path>) -> Self {
+        let path = path.as_ref();
+        if !path.exists() {
+            match fs::create_dir_all(path) {
                 Ok(_) => (),
                 Err(e) => panic!("Error: creating directory: {:?}", e),
             }
-        } Self(path)
+        } Self(path.to_path_buf())
     }
 }
 
 impl Display for TmpPath {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}",  &self.0)
+        write!(f, "{}",  self.0.to_string_lossy().to_string())
     }
 }
 
