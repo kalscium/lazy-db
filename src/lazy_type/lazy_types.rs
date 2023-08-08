@@ -1,4 +1,4 @@
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum LazyINumType {
     I8,
     I16,
@@ -7,7 +7,7 @@ pub enum LazyINumType {
     I128,
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum LazyUNumType {
     U8,
     U16,
@@ -16,7 +16,7 @@ pub enum LazyUNumType {
     U128,
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum LazyFloatType {
     F32,
     F64,
