@@ -17,13 +17,13 @@ pub struct OFile {
 }
 
 impl OFile {
-    pub fn new<'a>(file_path: impl AsRef<Path>) -> Result<Self, OFileError<'a>> {
+    pub fn new<'a>(file_path: impl AsRef<Path>) -> Result<Self, OFileError> {
         if file_path.as_ref().exists() {
             Self::new_read(file_path)
         } else { Self::new_write(file_path) }
     }
 
-    fn new_write<'a>(file_path: impl AsRef<Path>) -> Result<Self, OFileError<'a>> {
+    fn new_write<'a>(file_path: impl AsRef<Path>) -> Result<Self, OFileError> {
         let file = unwrap_result!(File::create(&file_path) => |e| Err(OFileError::IOError(e)));
         Ok(Self {
             file_path: file_path.as_ref().to_path_buf(),
@@ -33,7 +33,7 @@ impl OFile {
         })
     }
 
-    fn new_read<'a>(file_path: impl AsRef<Path>) -> Result<Self, OFileError<'a>> {
+    fn new_read<'a>(file_path: impl AsRef<Path>) -> Result<Self, OFileError> {
         let file = unwrap_result!(File::open(&file_path) => |e| Err(OFileError::IOError(e)));
         Ok(Self {
             file_path: file_path.as_ref().to_path_buf(),
@@ -43,11 +43,11 @@ impl OFile {
         })
     }
 
-    pub fn read(&mut self) -> Result<u8, OFileError<'_>> {
+    pub fn read(&mut self) -> Result<u8, OFileError> {
         let reader: &mut BufReader<File> = match &mut self.mode {
             OFileMode::Read(r) => r,
             OFileMode::Modify(r, _) => r,
-            OFileMode::Write(_) => return Err(OFileError::CannotReadFile(self.file_path.to_str().unwrap()))
+            OFileMode::Write(_) => return Err(OFileError::CannotReadFile(self.file_path.to_path_buf()))
         };
         
         let mut bytes = [0u8];
@@ -63,7 +63,7 @@ impl OFile {
         Ok(bytes[0])
     }
 
-    pub fn write(&mut self, value: u8) -> Result<(), OFileError<'_>> {
+    pub fn write(&mut self, value: u8) -> Result<(), OFileError> {
         let writer: &mut BufWriter<File> = match &mut self.mode {
             OFileMode::Write(w) => w,
             OFileMode::Modify(_, w) => w,
@@ -79,7 +79,18 @@ impl OFile {
         Ok(())
     }
 
-    pub fn skip(&mut self, amount: u64) -> Result<(), OFileError<'_>> {
+    pub fn to_bytes(mut self) -> Result<Box<[u8]>, OFileError> {
+        let mut bytes = Vec::new();
+        loop {
+            match self.read() {
+                Ok(x) => bytes.push(x),
+                Err(OFileError::EndOfStream) => break,
+                Err(e) => return Err(e),
+            }
+        }; Ok(bytes.into_boxed_slice())
+    }
+
+    pub fn skip(&mut self, amount: u64) -> Result<(), OFileError> {
         match &mut self.mode {
             OFileMode::Write(w) => {
                 for _ in 0..amount {
@@ -112,13 +123,13 @@ impl OFile {
     }
 
     #[inline]
-    pub fn finish<'a>(mut self) -> Result<(), OFileError<'a>> {
+    pub fn finish(mut self) -> Result<(), OFileError> {
         self.flush()?;
         std::mem::forget(self);
         Ok(())
     }
 
-    fn flush<'a>(&mut self) -> Result<(), OFileError<'a>> {
+    fn flush(&mut self) -> Result<(), OFileError> {
         let mut rturn = Ok(());
 
         // Try to Flush Buffers
