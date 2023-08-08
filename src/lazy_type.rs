@@ -7,6 +7,7 @@ pub trait CustomLazyType {
     fn hollow() -> Self where Self: Sized;
 }
 
+#[derive(Debug, PartialEq, Eq)]
 pub enum LazyType {
     Void,
     Custom(u8), // dunno how to implement yet
