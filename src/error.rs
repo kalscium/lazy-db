@@ -1,4 +1,5 @@
 use std::{fmt, error::Error};
+use crate::LazyType;
 pub use crate::handler;
 pub(crate) use crate::handle;
 
@@ -16,6 +17,7 @@ pub enum LDBError {
     WalkDirError(walkdir::Error),
     FileNotFound(String),
     InvalidLazyType(u8),
+    IncorrectType(LazyType, LazyType),
 }
 
 impl fmt::Display for LDBError {
@@ -26,6 +28,7 @@ impl fmt::Display for LDBError {
             IOError(e) => write!(f, "IO Error: {:?}", e),
             WalkDirError(e) => write!(f, "WalkDir Error: {:?}", e),
             InvalidLazyType(t) => write!(f, "Invalid Lazy Type {t}"),
+            IncorrectType(t1, t2) => write!(f, "Cannot read type '{0:?}' as '{1:?}'", t1, t2),
         }
     }
 }

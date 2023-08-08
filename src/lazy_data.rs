@@ -9,6 +9,27 @@ pub struct LazyData {
 }
 
 impl LazyData {
+    /// Creates new `LazyData` with the type of `LazyType::Void`
+    #[inline]
+    pub fn new_void(path: impl AsRef<Path>) -> Result<(), LDBError> { Self::uninit(path)?; Ok(()) }
+
+    /// Creates an uninitialised `LazyData` with the default type of `LazyType::Void`
+    fn uninit(path: impl AsRef<Path>) -> Result<Self, LDBError> {
+        let path = path.as_ref();
+        let ofile = OFile::new(path);
+        let ofile = match ofile {
+            Err(e) => if let OFileError::IOError(e) = e {
+                return Err(LDBError::IOError(e));
+            } else { panic!("Shouldn't panic as OFile creation doesn't throw non IOError errors") }
+            Ok(x) => x,
+        };
+        Ok(Self {
+            path: path.to_path_buf(),
+            lazy_type: LazyType::Void,
+            ofile,
+        })
+    }
+
     pub fn load(path: impl AsRef<Path>) -> Result<Self, LDBError> {
         let path = path.as_ref();
 
@@ -41,7 +62,10 @@ impl LazyData {
     /// 
     /// ---
     /// Collects the `LazyData` as a Lazy `OFile`.
-    pub fn collect_ofile(self) -> OFile {
-        self.ofile
+    /// 
+    /// Returns `LDBError::IncorrectType` if the LazyData type is not `LazyType::Binary`
+    pub fn collect_ofile(self) -> Result<OFile, LDBError> {
+        if self.lazy_type != LazyType::Binary { return Err(LDBError::IncorrectType(self.lazy_type, LazyType::Binary)) }
+        Ok(self.ofile)
     }
 }
