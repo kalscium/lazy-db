@@ -4,7 +4,6 @@ pub enum LazyINumType {
     I16,
     I32,
     I64,
-    I128,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
@@ -13,7 +12,6 @@ pub enum LazyUNumType {
     U16,
     U32,
     U64,
-    U128,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]

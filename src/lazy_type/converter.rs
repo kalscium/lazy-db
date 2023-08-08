@@ -9,7 +9,6 @@ impl LazyINumType {
             I16 => 1,
             I32 => 2,
             I64 => 3,
-            I128 => 4,
         }
     }
 }
@@ -22,7 +21,6 @@ impl LazyUNumType {
             U16 => 1,
             U32 => 2,
             U64 => 3,
-            U128 => 4,
         }
     }
 }
@@ -60,7 +58,6 @@ impl LazyINumType {
             1 => Ok(I16),
             2 => Ok(I32),
             3 => Ok(I64),
-            4 => Ok(I128),
             _ => Err(LDBError::InvalidLazyType(byte)),
         }
     }
@@ -74,7 +71,6 @@ impl LazyUNumType {
             1 => Ok(U16),
             2 => Ok(U32),
             3 => Ok(U64),
-            4 => Ok(U128),
             _ => Err(LDBError::InvalidLazyType(byte)),
         }
     }
