@@ -9,11 +9,11 @@ pub struct LazyData {
 }
 
 impl LazyData {
-    /// Creates new `LazyData` with the type of `LazyType::Void`
+    /// Creates a new `LazyData` file with the type of `LazyType::Void`
     #[inline]
     pub fn new_void(path: impl AsRef<Path>) -> Result<(), LDBError> { Self::uninit(path)?; Ok(()) }
 
-    /// Creates an uninitialised `LazyData` with the default type of `LazyType::Void`
+    /// Creates an uninitialised `LazyData` file with the default type of `LazyType::Void`
     fn uninit(path: impl AsRef<Path>) -> Result<Self, LDBError> {
         let path = path.as_ref();
         let ofile = OFile::new(path);

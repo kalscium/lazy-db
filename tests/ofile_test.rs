@@ -5,10 +5,10 @@ use std::fs;
 use lazy_db::ofile::*;
 
 #[test]
-fn isol_ofile_read() {
+fn ofile_read() {
     // Set up reading situation
     let tmp = new_env();
-    let path = format!("{tmp}/test_file.bin");
+    let path = tmp.get_path().join("test_file.bin");
     let contents: [u8; 16] = [8, 37, 23, 94, 12, 77, 54, 88, 46, 100, 255, 233, 142, 157, 177, 200];
     fs::write(&path, contents).unwrap();
 
@@ -21,10 +21,10 @@ fn isol_ofile_read() {
 }
 
 #[test]
-fn isol_ofile_write() {
+fn ofile_write() {
     // set up needed stuff for test
     let tmp = new_env();
-    let path = format!("{tmp}/test_file.bin");
+    let path = tmp.get_path().join("test_file.bin");
     let contents: [u8; 16] = [8, 37, 23, 94, 12, 77, 54, 88, 46, 100, 255, 233, 142, 157, 177, 200];
 
     // Actual writing
@@ -42,10 +42,10 @@ fn isol_ofile_write() {
 }
 
 #[test]
-fn isol_ofile_modify() {
+fn ofile_modify() {
     // set up stuff for test
     let tmp = new_env();
-    let path = format!("{tmp}/to_modify.bin");
+    let path = tmp.get_path().join("to_modify.bin");
     let original = [1u8, 12, 32, 48, 96, 34, 87, 26];
     let expected: Vec<u8> = original.iter().map(|b| b * 2).collect();
 
@@ -70,10 +70,10 @@ fn isol_ofile_modify() {
 }
 
 #[test]
-fn isol_ofile_modify_in_depth() {
+fn ofile_modify_in_depth() {
     // set up stuff for test
     let tmp = new_env();
-    let path = format!("{tmp}/to_modify.bin");
+    let path = tmp.get_path().join("to_modify.bin");
     let original = [1u8, 12, 32, 48, 96, 34, 87, 26];
     let expected = [1u8, 12, 64, 96, 192, 68, 174, 52];
 

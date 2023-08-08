@@ -9,6 +9,7 @@ pub use crate::{
     error::{LDBErrContext, LDBError, LDBHandler},
     lazy_type::*,
     ofile::*,
+    lazy_data::*,
 };
 
 #[macro_export]
