@@ -26,6 +26,10 @@ impl TmpPath {
             }
         } Self(path.to_path_buf())
     }
+
+    pub fn get_path(&self) -> &Path {
+        self.0.as_path()
+    }
 }
 
 impl Display for TmpPath {
