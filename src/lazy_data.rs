@@ -18,33 +18,28 @@ pub enum ActiveData {
 pub struct LazyData {
     pub path: PathBuf,
     pub lazy_type: LazyType,
+    wrapper: FileWrapper,
 }
 
 impl LazyData {
-    /// Creates an uninitialised `LazyData` file with the default type of `LazyType::Void`
-    fn uninit(path: impl AsRef<Path>) -> Result<Self, LDBError> {
-        let path = path.as_ref();
-        Ok(Self {
-            path: path.to_path_buf(),
-            lazy_type: LazyType::Void,
-        })
-    }
-
     pub fn load(path: impl AsRef<Path>) -> Result<Self, LDBError> {
         let path = path.as_ref();
 
         // Check for the existance of the path and if it's a file
         if !path.is_file() { return Err(LDBError::FileNotFound(path.to_string_lossy().to_string())) };
 
-        // Initialise an OFile
+        // Get the reader
+        let mut reader =
+            FileWrapper::new_reader(unwrap_result!(std::fs::File::open(&path) => |e| Err(LDBError::IOError(e))));
 
         // Reads the byte repr of it's `LazyType`
-        let mut lazy_type = [0u8; 2];
-        // unwrap_result!(reader.read(&mut lazy_type) => |e| Err(LDBError::IOError(e)));
+        let lazy_type =
+            LazyType::from_bytes(reader.read(2)?.as_ref())?;
 
         Ok(Self {
             path: path.to_path_buf(),
-            lazy_type: LazyType::from_bytes(lazy_type)?,
+            lazy_type,
+            wrapper: reader,
         })
     }
 }

@@ -10,16 +10,16 @@ macro_rules! incorrect_type {
 }
 
 impl LazyData {
-    /// ### Lazy Action
-    /// ( Only returns internal ofile field of `Lazy Data` )
+    /// ### Expensive Action
+    /// ( Reads all of the contents of the file and stores it on the heap )
     /// 
     /// ---
-    /// Collects the `LazyData` as a Lazy `OFile`.
+    /// Collects the `LazyData` as a `Box<[u8]>`.
     /// 
     /// Returns `LDBError::IncorrectType` if the LazyData type is not `LazyType::Binary`
-    pub fn collect_ofile(self) -> Result<OFile, LDBError> {
+    pub fn collect_binary(self) -> Result<Box<[u8]>, LDBError> {
         incorrect_type!(self.lazy_type, LazyType::Binary);
-        Ok(self.ofile)
+        self.wrapper.read_to_end()
     }
 
     /// ### Expensive Action
@@ -33,7 +33,7 @@ impl LazyData {
     pub fn collect_string(self) -> Result<String, LDBError> {
         incorrect_type!(self.lazy_type, LazyType::String);
         // Expensive and best to be avoided if possible
-        let bytes = unwrap_result!(self.ofile.to_bytes() => |e| if let OFileError::IOError(e) = e { Err(LDBError::IOError(e)) } else { panic!("OFile read should only return an IO error") });
+        let bytes = self.wrapper.read_to_end()?;
         
         if let Ok(x) = String::from_utf8(bytes.to_vec()) {
             Ok(x)

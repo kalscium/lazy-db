@@ -1,6 +1,5 @@
 mod isol;
 use isol::*;
-
 use lazy_db::*;
 
 #[test]

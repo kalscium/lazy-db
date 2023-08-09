@@ -88,17 +88,18 @@ impl LazyFloatType {
 }
 
 impl LazyType {
-    pub fn from_bytes(bytes: [u8; 2]) -> Result<Self, LDBError> {
+    pub fn from_bytes(bytes: &[u8]) -> Result<Self, LDBError> {
         use LazyType::*;
         Ok(match bytes {
             [0, _] => Void,
-            [1, x] => Custom(x),
+            [1, x] => Custom(*x),
             [2, _] => String,
-            [3, x] => INum(LazyINumType::from_byte(x)?),
-            [4, x] => UNum(LazyUNumType::from_byte(x)?),
-            [5, x] => Float(LazyFloatType::from_byte(x)?),
+            [3, x] => INum(LazyINumType::from_byte(*x)?),
+            [4, x] => UNum(LazyUNumType::from_byte(*x)?),
+            [5, x] => Float(LazyFloatType::from_byte(*x)?),
             [6, _] => Binary,
-            [x, _] => return Err(LDBError::InvalidLazyType(x)),
+            [x, _] => return Err(LDBError::InvalidLazyType(*x)),
+            _ => return Err(LDBError::InvalidLazyType(44)), // 44 as in 404 not found ( replace with better error handling )
         })
     }
 }
