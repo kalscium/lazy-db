@@ -52,3 +52,29 @@ fn lazy_data_unsigned() {
     // Two values must be the same
     assert_eq!(og_u32, new_u32);
 }
+
+#[test]
+fn lazy_data_f32() {
+    let tmp = new_env();
+    let path = tmp.get_path().join("new_f32.ld");
+    // Create f32 file
+    let og_f32 = 123.123f32;
+    LazyData::new_f32(&path, og_f32).unwrap();
+    // Load f32 file
+    let new_f32 = LazyData::load(path).unwrap().collect_f32().unwrap();
+    // Two values must be the same
+    assert_eq!(og_f32, new_f32);
+}
+
+#[test]
+fn lazy_data_f64() {
+    let tmp = new_env();
+    let path = tmp.get_path().join("new_f32.ld");
+    // Create f32 file
+    let og_f64 = 123.2345345123f64;
+    LazyData::new_f64(&path, og_f64).unwrap();
+    // Load f32 file
+    let new_f64 = LazyData::load(path).unwrap().collect_f64().unwrap();
+    // Two values must be the same
+    assert_eq!(og_f64, new_f64);
+}
