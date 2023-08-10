@@ -19,6 +19,7 @@ pub enum LDBError {
     InvalidLazyType(u8),
     IncorrectType(LazyType, String),
     InvalidUTF8String(Box<[u8]>),
+    InvalidNumberByteLength(u8, String),
 }
 
 impl fmt::Display for LDBError {
@@ -31,6 +32,7 @@ impl fmt::Display for LDBError {
             InvalidLazyType(t) => write!(f, "Invalid Lazy Type {t}"),
             IncorrectType(t1, t2) => write!(f, "Cannot read type '{0:?}' as '{1:?}'", t1, t2),
             InvalidUTF8String(x) => write!(f, "Bytes represent an invalid utf8 string: {:?}", x),
+            InvalidNumberByteLength(x, t) => write!(f, "Invalid byte length '{x}' for number type '{t:?}'")
         }
     }
 }

@@ -30,7 +30,7 @@ impl LazyData {
 
         // Get the reader
         let mut reader =
-            FileWrapper::new_reader(unwrap_result!(std::fs::File::open(&path) => |e| Err(LDBError::IOError(e))));
+            FileWrapper::new_reader(unwrap_result!(std::fs::File::open(path) => |e| Err(LDBError::IOError(e))));
 
         // Reads the byte repr of it's `LazyType`
         let lazy_type =

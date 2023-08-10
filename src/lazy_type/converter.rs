@@ -9,6 +9,7 @@ impl LazyINumType {
             I16 => 1,
             I32 => 2,
             I64 => 3,
+            I128 => 4,
         }
     }
 }
@@ -21,6 +22,7 @@ impl LazyUNumType {
             U16 => 1,
             U32 => 2,
             U64 => 3,
+            U128 => 4,
         }
     }
 }
