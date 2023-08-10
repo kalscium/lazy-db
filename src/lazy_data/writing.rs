@@ -58,8 +58,21 @@ impl LazyData {
     new_number!((new_u64) u64 = LazyUNumType::U64);
     new_number!((new_u128) u128 = LazyUNumType::U128);
 
-    // /// Create a new `LazyData` file with a signed integer value and type
-    // pub fn new_signed<T>(path: impl AsRef<Path>, lazy_type: LazyINumType, value: i64) -> Result<(), LDBError> {
-        
-    // }
+    /* Floating point numbers */
+
+    /// Creates a new `LazyData` file with an `f32` value and type
+    pub fn new_f32(path: impl AsRef<Path>, value: f32) -> Result<(), LDBError> {
+        let bytes = value.to_be_bytes();
+        let mut writer = Self::new_writer(&path, LazyType::Float(LazyFloatType::F32))?;
+        writer.write(&bytes)?;
+        Ok(())
+    }
+
+    /// Creates a new `LazyData` file with an `f64` value and type
+    pub fn new_f64(path: impl AsRef<Path>, value: f64) -> Result<(), LDBError> {
+        let bytes = value.to_be_bytes();
+        let mut writer = Self::new_writer(&path, LazyType::Float(LazyFloatType::F64))?;
+        writer.write(&bytes)?;
+        Ok(())
+    }
 }
