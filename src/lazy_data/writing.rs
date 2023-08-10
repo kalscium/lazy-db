@@ -12,7 +12,7 @@ macro_rules! new_number {
     };
 
     (signed ($name:ident) $type:ty = $lazy_type:expr) => {
-        /// Creates a new `LazyData` file with a integer and type
+        /// Creates a new `LazyData` file with a signed integer and type
         pub fn $name(path: impl AsRef<Path>, value: $type) -> Result<(), LDBError> {
             let bytes = value.to_be_bytes();
             let mut writer = Self::new_writer(&path, LazyType::INum($lazy_type))?;
