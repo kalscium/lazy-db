@@ -4,7 +4,6 @@ use crate::LazyType;
 #[derive(Debug)]
 pub enum LDBError {
     IOError(std::io::Error),
-    WalkDirError(walkdir::Error),
     FileNotFound(String),
     InvalidLazyType(u8),
     IncorrectType(LazyType, String),
@@ -18,7 +17,6 @@ impl fmt::Display for LDBError {
         match self {
             FileNotFound(p) => write!(f, "File '{p}' not found"),
             IOError(e) => write!(f, "IO Error: {:?}", e),
-            WalkDirError(e) => write!(f, "WalkDir Error: {:?}", e),
             InvalidLazyType(t) => write!(f, "Invalid Lazy Type {t}"),
             IncorrectType(t1, t2) => write!(f, "Cannot read type '{0:?}' as '{1:?}'", t1, t2),
             InvalidUTF8String(x) => write!(f, "Bytes represent an invalid utf8 string: {:?}", x),
