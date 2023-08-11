@@ -40,11 +40,11 @@ impl Version {
         Ok(Version::new(major, minor, build))
     }
 
-    pub fn is_compatible(&self, other: Self) -> bool {
+    pub fn is_compatible(&self, other: &Self) -> bool {
         other.major == self.major && other.minor <= self.minor
     }
 
-    pub fn is_compatible_or_else<F: FnOnce()>(&self, other: Self, f: F) {
+    pub fn is_compatible_or_else<F: FnOnce()>(&self, other: &Self, f: F) {
         if !self.is_compatible(other) { f() }
     }
 }

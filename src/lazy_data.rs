@@ -20,7 +20,7 @@ impl LazyData {
         let path = path.as_ref();
 
         // Check for the existance of the path and if it's a file
-        if !path.is_file() { return Err(LDBError::FileNotFound(path.to_string_lossy().to_string())) };
+        if !path.is_file() { return Err(LDBError::FileNotFound(path.to_path_buf())) };
 
         // Get the reader
         let mut reader =
