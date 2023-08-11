@@ -1,6 +1,7 @@
 pub mod error;
 pub mod lazy_type;
 pub mod lazy_data;
+pub mod version;
 
 // Prelude
 pub use crate::{
@@ -8,6 +9,8 @@ pub use crate::{
     lazy_type::*,
     lazy_data::*,
 };
+
+pub const VERSION: version::Version = version::Version::new(0, 1, 0);
 
 #[macro_export]
 macro_rules! const_eval {
