@@ -19,7 +19,7 @@ macro_rules! collect_number {
         /// 
         /// Returns `LDBError::IncorrectType` if the LazyData type is not the correct unsigned integer
         pub fn $name(self) -> Result<$type, LDBError> {
-            incorrect_type!(self.lazy_type, LazyType::UNum($lazy_type));
+            incorrect_type!(self.lazy_type, $lazy_type);
 
             // Expensive and best to be avoided if possible
             let bytes = self.wrapper.read_to_end()?;
@@ -47,7 +47,7 @@ macro_rules! collect_number {
         /// 
         /// Returns `LDBError::IncorrectType` if the LazyData type is not the correct signed integer
         pub fn $name(self) -> Result<$type, LDBError> {
-            incorrect_type!(self.lazy_type, LazyType::INum($lazy_type));
+            incorrect_type!(self.lazy_type, $lazy_type);
 
             // Expensive and best to be avoided if possible
             let bytes = self.wrapper.read_to_end()?;
@@ -101,18 +101,18 @@ impl LazyData {
     }
     
     // Unsigned numbers
-    collect_number!((collect_u8) u8 = LazyUNumType::U8);
-    collect_number!((collect_u16) u16 = LazyUNumType::U16);
-    collect_number!((collect_u32) u32 = LazyUNumType::U32);
-    collect_number!((collect_u64) u64 = LazyUNumType::U64);
-    collect_number!((collect_u128) u128 = LazyUNumType::U128);
+    collect_number!((collect_u8) u8 = LazyType::U8);
+    collect_number!((collect_u16) u16 = LazyType::U16);
+    collect_number!((collect_u32) u32 = LazyType::U32);
+    collect_number!((collect_u64) u64 = LazyType::U64);
+    collect_number!((collect_u128) u128 = LazyType::U128);
 
     // Signed numbers
-    collect_number!(signed (collect_i8) i8 = LazyINumType::I8);
-    collect_number!(signed (collect_i16) i16 = LazyINumType::I16);
-    collect_number!(signed (collect_i32) i32 = LazyINumType::I32);
-    collect_number!(signed (collect_i64) i64 = LazyINumType::I64);
-    collect_number!(signed (collect_i128) i128 = LazyINumType::I128);
+    collect_number!(signed (collect_i8) i8 = LazyType::I8);
+    collect_number!(signed (collect_i16) i16 = LazyType::I16);
+    collect_number!(signed (collect_i32) i32 = LazyType::I32);
+    collect_number!(signed (collect_i64) i64 = LazyType::I64);
+    collect_number!(signed (collect_i128) i128 = LazyType::I128);
 
     /* Floating point numbers */
 
@@ -124,7 +124,7 @@ impl LazyData {
     /// 
     /// Returns `LDBError::IncorrectType` if the LazyData type is not ``LazyFloat::F32`
     pub fn collect_f32(self) -> Result<f32, LDBError> {
-        incorrect_type!(self.lazy_type, LazyType::Float(LazyFloatType::F32));
+        incorrect_type!(self.lazy_type, LazyType::F32);
 
         // Expensive and best to be avoided if possible
         let bytes = self.wrapper.read_to_end()?;
@@ -149,7 +149,7 @@ impl LazyData {
     /// 
     /// Returns `LDBError::IncorrectType` if the LazyData type is ``LazyFloatType::F64`
     pub fn collect_f64(self) -> Result<f64, LDBError> {
-        incorrect_type!(self.lazy_type, LazyType::Float(LazyFloatType::F64));
+        incorrect_type!(self.lazy_type, LazyType::F64);
 
         // Expensive and best to be avoided if possible
         let bytes = self.wrapper.read_to_end()?;

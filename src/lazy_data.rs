@@ -9,12 +9,6 @@ pub use file_wrapper::*;
 use std::path::{Path, PathBuf};
 use crate::*;
 
-pub enum ActiveData {
-    SignedNum(LazyINumType, i64),
-    UnsignedNum(LazyINumType, u64),
-    Float(LazyFloatType, f64),
-}
-
 pub struct LazyData {
     pub path: PathBuf,
     pub lazy_type: LazyType,
@@ -34,7 +28,7 @@ impl LazyData {
 
         // Reads the byte repr of it's `LazyType`
         let lazy_type =
-            LazyType::from_bytes(reader.read(2)?.as_ref())?;
+            LazyType::try_from(reader.read(1)?[0])?;
 
         Ok(Self {
             path: path.to_path_buf(),

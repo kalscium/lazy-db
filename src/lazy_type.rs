@@ -1,19 +1,22 @@
-mod lazy_types;
 mod converter;
-pub use lazy_types::*; // Just to clean up code
 pub use converter::*;
 
-pub trait CustomLazyType {
-    fn hollow() -> Self where Self: Sized;
-}
-
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
+#[repr(u8)]
 pub enum LazyType {
     Void,
-    Custom(u8), // dunno how to implement yet
     String,
-    INum(LazyINumType),
-    UNum(LazyUNumType),
-    Float(LazyFloatType),
     Binary,
+    I8,
+    I16,
+    I32,
+    I64,
+    I128,
+    U8,
+    U16,
+    U32,
+    U64,
+    U128,
+    F32,
+    F64,
 }

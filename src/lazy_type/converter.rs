@@ -1,107 +1,53 @@
 use super::*;
 use crate::LDBError;
+use std::convert::TryFrom;
 
-impl LazyINumType {
-    pub fn to_byte(self) -> u8 {
-        use LazyINumType::*;
-        match self {
-            I8 => 0,
-            I16 => 1,
-            I32 => 2,
-            I64 => 3,
-            I128 => 4,
-        }
-    }
-}
 
-impl LazyUNumType {
-    pub fn to_byte(self) -> u8 {
-        use LazyUNumType::*;
-        match self {
-            U8 => 0,
-            U16 => 1,
-            U32 => 2,
-            U64 => 3,
-            U128 => 4,
-        }
-    }
-}
+impl TryFrom<u8> for LazyType {
+    type Error = LDBError;
 
-impl LazyFloatType {
-    pub fn to_byte(self) -> u8 {
-        use LazyFloatType::*;
-        match self {
-            F32 => 0,
-            F64 => 1,
-        }
-    }
-}
-
-impl LazyType {
-    pub fn to_bytes(self) -> [u8; 2] {
+    fn try_from(byte: u8) -> Result<Self, Self::Error> {
         use LazyType::*;
-        match self {
-            Void => [0, 0],
-            Custom(x) => [1, x],
-            String => [2, 0],
-            INum(x) => [3, x.to_byte()],
-            UNum(x) => [4, x.to_byte()],
-            Float(x) => [5, x.to_byte()],
-            Binary => [6, 0],
-        }
-    }
-}
-
-impl LazyINumType {
-    pub fn from_byte(byte: u8) -> Result<Self, LDBError> {
-        use LazyINumType::*;
-        match byte {
-            0 => Ok(I8),
-            1 => Ok(I16),
-            2 => Ok(I32),
-            3 => Ok(I64),
-            _ => Err(LDBError::InvalidLazyType(byte)),
-        }
-    }
-}
-
-impl LazyUNumType {
-    pub fn from_byte(byte: u8) -> Result<Self, LDBError> {
-        use LazyUNumType::*;
-        match byte {
-            0 => Ok(U8),
-            1 => Ok(U16),
-            2 => Ok(U32),
-            3 => Ok(U64),
-            _ => Err(LDBError::InvalidLazyType(byte)),
-        }
-    }
-}
-
-impl LazyFloatType {
-    pub fn from_byte(byte: u8) -> Result<Self, LDBError> {
-        use LazyFloatType::*;
-        match byte {
-            0 => Ok(F32),
-            1 => Ok(F64),
-            _ => Err(LDBError::InvalidLazyType(byte)),
-        }
-    }
-}
-
-impl LazyType {
-    pub fn from_bytes(bytes: &[u8]) -> Result<Self, LDBError> {
-        use LazyType::*;
-        Ok(match bytes {
-            [0, _] => Void,
-            [1, x] => Custom(*x),
-            [2, _] => String,
-            [3, x] => INum(LazyINumType::from_byte(*x)?),
-            [4, x] => UNum(LazyUNumType::from_byte(*x)?),
-            [5, x] => Float(LazyFloatType::from_byte(*x)?),
-            [6, _] => Binary,
-            [x, _] => return Err(LDBError::InvalidLazyType(*x)),
-            _ => return Err(LDBError::InvalidLazyType(44)), // 44 as in 404 not found ( replace with better error handling )
+        Ok(match byte {
+            0 => Void,
+            1 => String,
+            2 => Binary,
+            3 => I8,
+            4 => I16,
+            5 => I32,
+            6 => I64,
+            7 => I128,
+            8 => U8,
+            9 => U16,
+            10 => U32,
+            11 => U64,
+            12 => U128,
+            13 => F32,
+            14 => F64,
+            _ => return Err(LDBError::InvalidLazyType(byte)),
         })
+    }
+}
+
+impl From<LazyType> for u8 {
+    fn from(value: LazyType) -> Self {
+        use LazyType::*;
+        match value {
+            Void => 0,
+            String => 1,
+            Binary => 2,
+            I8 => 3,
+            I16 => 4,
+            I32 => 5,
+            I64 => 6,
+            I128 => 7,
+            U8 => 8,
+            U16 => 9,
+            U32 => 10,
+            U64 => 11,
+            U128 => 12,
+            F32 => 13,
+            F64 => 14,
+        }
     }
 }
