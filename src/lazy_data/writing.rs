@@ -75,4 +75,10 @@ impl LazyData {
         writer.write(&bytes)?;
         Ok(())
     }
+
+    /// Creates a new `LazyData` file with a `binary` value and type
+    pub fn new_binary(path: impl AsRef<Path>, value: &[u8]) -> Result<(), LDBError> {
+        let mut writer = Self::new_writer(path, LazyType::Binary)?;
+        writer.write(value)
+    }
 }

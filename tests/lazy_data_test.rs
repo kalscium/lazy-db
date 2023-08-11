@@ -69,7 +69,7 @@ fn lazy_data_f32() {
 #[test]
 fn lazy_data_f64() {
     let tmp = new_env();
-    let path = tmp.get_path().join("new_f32.ld");
+    let path = tmp.get_path().join("new_f64.ld");
     // Create f32 file
     let og_f64 = 123.2345345123f64;
     LazyData::new_f64(&path, og_f64).unwrap();
@@ -77,4 +77,17 @@ fn lazy_data_f64() {
     let new_f64 = LazyData::load(path).unwrap().collect_f64().unwrap();
     // Two values must be the same
     assert_eq!(og_f64, new_f64);
+}
+
+#[test]
+fn lazy_data_binary() {
+    let tmp = new_env();
+    let path = tmp.get_path().join("new_binary.ld");
+    // Create binary file
+    let og_bin = Box::new([12u8, 234, 48, 128]);
+    LazyData::new_binary(&path, og_bin.as_ref()).unwrap();
+    // Load binary file
+    let new_bin = LazyData::load(path).unwrap().collect_binary().unwrap();
+    // Two values must be the same
+    assert_eq!(*og_bin, *new_bin);
 }
