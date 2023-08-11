@@ -1,14 +1,12 @@
 pub mod error;
 pub mod lazy_type;
 pub mod lazy_data;
-pub mod lazy_container;
 
 // Prelude
 pub use crate::{
     error::LDBError,
     lazy_type::*,
     lazy_data::*,
-    lazy_container::*,
 };
 
 #[macro_export]
