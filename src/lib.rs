@@ -2,12 +2,14 @@ pub mod error;
 pub mod lazy_type;
 pub mod lazy_data;
 pub mod version;
+pub mod lazy_database;
 
 // Prelude
 pub use crate::{
     error::LDBError,
     lazy_type::*,
     lazy_data::*,
+    lazy_database::*,
 };
 
 pub const VERSION: version::Version = version::Version::new(0, 1, 0);
