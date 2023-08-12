@@ -3,12 +3,17 @@ use std::path::{Path, PathBuf};
 use std::fmt::Display;
 use std::fmt;
 
+static mut UID: u8 = 0;
+
 pub fn new_env() -> TmpPath {
     // creates 'test_tmp' folder if it doesn't exist
     let path = Path::new("./test_tmp/");
     if !path.exists() {
         fs::create_dir_all(path).expect("Error: couldn't create directory!");
-    }; TmpPath::new("./test_tmp/")
+    }; unsafe {
+        UID += 1;
+        TmpPath::new(format!("./test_tmp/{UID}"))
+    }
 }
 
 pub struct TmpPath(PathBuf);

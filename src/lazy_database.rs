@@ -20,7 +20,11 @@ impl LazyDB {
             let meta = path.join(".meta");
             if !meta.is_file() {
                 // Write version
-                LazyData::new_binary(meta, &[VERSION.major, VERSION.minor, VERSION.build])?;
+                LazyData::new_binary(
+                    FileWrapper::new_writer(
+                        unwrap_result!(fs::File::create(meta) => |e| Err(LDBError::IOError(e)))
+                    ), &[VERSION.major, VERSION.minor, VERSION.build],
+                )?;
             }
         };
 

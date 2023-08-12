@@ -1,91 +1,61 @@
 mod isol;
 use isol::*;
 use lazy_db::*;
+use std::fs::File;
+
+macro_rules! test_lazy_data {
+    ($(($name:ident) [$func:ident, $collect:ident] $value:expr => $path:expr;)*) => {
+        $(test_lazy_data!(@inner ($name) [$func, $collect] $value => $path);)*
+    };
+
+    (@inner ($name:ident) [$func:ident, $collect:ident] $value:expr  => $path:expr) => {
+        #[test]
+        fn $name() {
+            let tmp = new_env();
+            let path = tmp.get_path().join($path);
+            let og = $value;
+            // Create file
+            let file = FileWrapper::new_writer(File::create(&path).unwrap());
+            // Write to file
+            LazyData::$func(file, og.clone()).unwrap();
+            // Load file
+            let new = LazyData::load(path).unwrap().$collect().unwrap();
+            // Values must be the same
+            assert_eq!(og, new);
+        }
+    };
+}
 
 #[test]
 fn lazy_data_new_void() {
     let tmp = new_env();
     let path = tmp.get_path().join("new_void.ld");
-    // Create void file
-    LazyData::new_void(&path).unwrap();
+    // Create file
+    let file = FileWrapper::new_writer(File::create(&path).unwrap());
+    // Write void
+    LazyData::new_void(file).unwrap();
     // Load void file
     let lazy_data = LazyData::load(path).unwrap();
     // Type must be void
     assert_eq!(lazy_data.lazy_type, LazyType::Void);
 }
 
-#[test]
-fn lazy_data_string() {
-    let tmp = new_env();
-    let path = tmp.get_path().join("new_string.ld");
-    // Create string file
-    let og_string = String::from("Hello world!");
-    LazyData::new_string(&path, &og_string).unwrap();
-    // Load string file
-    let new_string = LazyData::load(path).unwrap().collect_string().unwrap();
-    // String must be the same
-    assert_eq!(og_string, new_string);
-}
-
-#[test]
-fn lazy_data_signed() {
-    let tmp = new_env();
-    let path = tmp.get_path().join("new_signed.ld");
-    // Create i32 file
-    let og_i32 = 34563435i32;
-    LazyData::new_i32(&path, og_i32).unwrap();
-    // Load i32 file
-    let new_i32 = LazyData::load(path).unwrap().collect_i32().unwrap();
-    // Two values must be the same
-    assert_eq!(og_i32, new_i32);
-}
-
-#[test]
-fn lazy_data_unsigned() {
-    let tmp = new_env();
-    let path = tmp.get_path().join("new_unsigned.ld");
-    // Create i32 file
-    let og_u32 = 34563435u32;
-    LazyData::new_u32(&path, og_u32).unwrap();
-    // Load i32 file
-    let new_u32 = LazyData::load(path).unwrap().collect_u32().unwrap();
-    // Two values must be the same
-    assert_eq!(og_u32, new_u32);
-}
-
-#[test]
-fn lazy_data_f32() {
-    let tmp = new_env();
-    let path = tmp.get_path().join("new_f32.ld");
-    // Create f32 file
-    let og_f32 = 123.123f32;
-    LazyData::new_f32(&path, og_f32).unwrap();
-    // Load f32 file
-    let new_f32 = LazyData::load(path).unwrap().collect_f32().unwrap();
-    // Two values must be the same
-    assert_eq!(og_f32, new_f32);
-}
-
-#[test]
-fn lazy_data_f64() {
-    let tmp = new_env();
-    let path = tmp.get_path().join("new_f64.ld");
-    // Create f32 file
-    let og_f64 = 123.2345345123f64;
-    LazyData::new_f64(&path, og_f64).unwrap();
-    // Load f32 file
-    let new_f64 = LazyData::load(path).unwrap().collect_f64().unwrap();
-    // Two values must be the same
-    assert_eq!(og_f64, new_f64);
+test_lazy_data! {
+    (lazy_data_string) [new_string, collect_string] "Hello world!" => "new_string.ld";
+    (lazy_data_signed) [new_i32, collect_i32] -1234i32 => "new_signed.ld";
+    (lazy_data_unsigned) [new_u32, collect_u32] 3908u32 => "new_unsigned.ld";
+    (lazy_data_f32) [new_f32, collect_f32] 123.234f32 => "new_f32.ld";
+    (lazy_data_f64) [new_f64, collect_f64] 123141234.1234f64 => "new_f64.ld";
 }
 
 #[test]
 fn lazy_data_binary() {
     let tmp = new_env();
     let path = tmp.get_path().join("new_binary.ld");
-    // Create binary file
     let og_bin = Box::new([12u8, 234, 48, 128]);
-    LazyData::new_binary(&path, og_bin.as_ref()).unwrap();
+    // Create binary file
+    let file = FileWrapper::new_writer(File::create(&path).unwrap());
+    LazyData::new_binary(file, og_bin.as_ref()).unwrap();
     // Load binary file
     let new_bin = LazyData::load(path).unwrap().collect_binary().unwrap();
     // Two values must be the same

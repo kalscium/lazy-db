@@ -3,20 +3,20 @@ use super::*;
 macro_rules! new_number {
     (($name:ident) $type:ty = $lazy_type:expr) => {
         /// Creates a new `LazyData` file with an unsigned integer and type
-        pub fn $name(path: impl AsRef<Path>, value: $type) -> Result<(), LDBError> {
+        pub fn $name(mut file: FileWrapper, value: $type) -> Result<(), LDBError> {
             let bytes = value.to_be_bytes();
-            let mut writer = Self::new_writer(&path, $lazy_type)?;
-            writer.write(&bytes)?;
+            file.write(&[$lazy_type.into()])?;
+            file.write(&bytes)?;
             Ok(())
         }
     };
 
     (signed ($name:ident) $type:ty = $lazy_type:expr) => {
         /// Creates a new `LazyData` file with a signed integer and type
-        pub fn $name(path: impl AsRef<Path>, value: $type) -> Result<(), LDBError> {
+        pub fn $name(mut file: FileWrapper, value: $type) -> Result<(), LDBError> {
             let bytes = value.to_be_bytes();
-            let mut writer = Self::new_writer(&path, $lazy_type)?;
-            writer.write(&bytes)?;
+            file.write(&[$lazy_type.into()])?;
+            file.write(&bytes)?;
             Ok(())
         }
     };
@@ -24,23 +24,16 @@ macro_rules! new_number {
 
 impl LazyData {
     /// Creates a new `LazyData` file with the type of `LazyType::Void`
-    pub fn new_void(path: impl AsRef<Path>) -> Result<(), LDBError> {
-        Self::new_writer(path, LazyType::Void)?;
+    pub fn new_void(mut file: FileWrapper) -> Result<(), LDBError> {
+        file.write(&[LazyType::Void.into()])?;
         Ok(())
     }
 
-    #[inline]
-    fn new_writer(path: impl AsRef<Path>, lazy_type: LazyType) -> Result<FileWrapper, LDBError> {
-        let mut writer = FileWrapper::new_writer(unwrap_result!(std::fs::File::create(path) => |e| Err(LDBError::IOError(e))));
-        writer.write(&[lazy_type.into()])?;
-        Ok(writer)
-    }
-
     /// Creates a new `LazyData` file with a `String` value and type
-    pub fn new_string(path: impl AsRef<Path>, value: &str) -> Result<(), LDBError> {
+    pub fn new_string(mut file: FileWrapper, value: &str) -> Result<(), LDBError> {
         let bytes = value.as_bytes();
-        let mut writer = Self::new_writer(&path, LazyType::String)?;
-        writer.write(bytes)?;
+        file.write(&[LazyType::String.into()])?;
+        file.write(bytes)?;
         Ok(())
     }
 
@@ -61,24 +54,24 @@ impl LazyData {
     /* Floating point numbers */
 
     /// Creates a new `LazyData` file with an `f32` value and type
-    pub fn new_f32(path: impl AsRef<Path>, value: f32) -> Result<(), LDBError> {
+    pub fn new_f32(mut file: FileWrapper, value: f32) -> Result<(), LDBError> {
         let bytes = value.to_be_bytes();
-        let mut writer = Self::new_writer(&path, LazyType::F32)?;
-        writer.write(&bytes)?;
+        file.write(&[LazyType::F32.into()])?;
+        file.write(&bytes)?;
         Ok(())
     }
 
     /// Creates a new `LazyData` file with an `f64` value and type
-    pub fn new_f64(path: impl AsRef<Path>, value: f64) -> Result<(), LDBError> {
+    pub fn new_f64(mut file: FileWrapper, value: f64) -> Result<(), LDBError> {
         let bytes = value.to_be_bytes();
-        let mut writer = Self::new_writer(&path, LazyType::F64)?;
-        writer.write(&bytes)?;
+        file.write(&[LazyType::F64.into()])?;
+        file.write(&bytes)?;
         Ok(())
     }
 
     /// Creates a new `LazyData` file with a `binary` value and type
-    pub fn new_binary(path: impl AsRef<Path>, value: &[u8]) -> Result<(), LDBError> {
-        let mut writer = Self::new_writer(path, LazyType::Binary)?;
-        writer.write(value)
+    pub fn new_binary(mut file: FileWrapper, value: &[u8]) -> Result<(), LDBError> {
+        file.write(&[LazyType::Binary.into()])?;
+        file.write(value)
     }
 }
