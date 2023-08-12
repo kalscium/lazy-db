@@ -68,4 +68,14 @@ impl LazyContainer {
         if !path.is_dir() { return Err(LDBError::DirNotFound(path)) };
         LazyContainer::load(path)
     }
+
+    /// Tries to remove item at specified key, if it fails nothing happens
+    pub fn remove(&self, key: impl AsRef<Path>) {
+        let path = self.path.join(key);
+        if path.is_dir() {
+            let _ = fs::remove_dir_all(path);
+        } else {
+            let _ = fs::remove_file(path);
+        }
+    }
 }
