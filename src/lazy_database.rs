@@ -60,4 +60,9 @@ impl LazyDB {
             path: path.to_path_buf(),
         })
     }
+
+    #[inline]
+    pub fn as_container(&self) -> Result<LazyContainer, LDBError> {
+        LazyContainer::load(&self.path)
+    }
 }
