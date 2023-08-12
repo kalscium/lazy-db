@@ -3,6 +3,7 @@ pub mod lazy_type;
 pub mod lazy_data;
 pub mod version;
 pub mod lazy_database;
+pub mod lazy_container;
 
 // Prelude
 pub use crate::{
@@ -10,6 +11,7 @@ pub use crate::{
     lazy_type::*,
     lazy_data::*,
     lazy_database::*,
+    lazy_container::*,
 };
 
 pub const VERSION: version::Version = version::Version::new(0, 1, 0);
