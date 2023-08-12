@@ -1,12 +1,10 @@
 use crate::*;
 use std::path::{Path, PathBuf};
 use std::fs;
-use std::ffi::OsString;
 
+/// A wrapper for a directory that holds individual `LazyData` files
 pub struct LazyContainer {
     path: PathBuf,
-    containers: Vec<OsString>,
-    files: Vec<OsString>,
 }
 
 impl LazyContainer {
@@ -20,8 +18,6 @@ impl LazyContainer {
         // Constructs self
         Ok(Self {
             path: path.to_path_buf(),
-            containers: Vec::new(),
-            files: Vec::new(),
         })
     }
 
@@ -34,25 +30,42 @@ impl LazyContainer {
         // Checks if path exists or not
         if !path.is_dir() { return Err(LDBError::DirNotFound(path)) };
 
-        // Values
-        let mut containers = Vec::<OsString>::new();
-        let mut files = Vec::<OsString>::new();
-
-        // Loads files and directories
-        let dir = unwrap_result!(fs::read_dir(&path) => |e| Err(LDBError::IOError(e)));
-        for entry in dir.flatten() {
-            if let Ok(file_type) = entry.file_type() {
-                if file_type.is_dir() {
-                    containers.push(entry.file_name());
-                } else { files.push(entry.file_name()) }
-            }
-        };
-
         // Constructs self
         Ok(Self {
             path,
-            containers,
-            files,
         })
+    }
+
+    /// Generates a `FileWrapper` in write mode from a key (like a relative file path)
+    /// 
+    /// If the data already exists, it will try to remove it
+    pub fn data_writer(&self, key: impl AsRef<Path>) -> Result<FileWrapper, LDBError> {
+        let path = self.path.join(key);
+        if path.is_file() { let _ = fs::remove_file(&path); }; // if files exists try remove it
+        let file = unwrap_result!(fs::File::create(path) => |e| Err(LDBError::IOError(e)));
+        Ok(FileWrapper::new_writer(file))
+    }
+
+    /// Generates a nested `LazyContainer` within this container
+    /// 
+    /// If container already exists it will load it instead
+    pub fn new_container(&self, key: impl AsRef<Path>) -> Result<LazyContainer, LDBError> {
+        let path = self.path.join(&key);
+        if path.is_dir() { return self.read_container(key) }; // If exists load instead
+        Ok(unwrap_result!(LazyContainer::init(path) => |e| Err(LDBError::IOError(e))))
+    }
+
+    /// Reads nested `LazyData` within this container
+    pub fn read_data(&self, key: impl AsRef<Path>) -> Result<LazyData, LDBError> {
+        let path = self.path.join(key);
+        if !path.is_file() { return Err(LDBError::FileNotFound(path)) };
+        Ok(LazyData::load(path)?)
+    }
+
+    /// Reads nexted `LazyContainer` within this container
+    pub fn read_container(&self, key: impl AsRef<Path>) -> Result<LazyContainer, LDBError> {
+        let path = self.path.join(key);
+        if !path.is_dir() { return Err(LDBError::DirNotFound(path)) };
+        LazyContainer::load(path)
     }
 }
