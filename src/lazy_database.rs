@@ -2,6 +2,25 @@ use crate::*;
 use std::path::{Path, PathBuf};
 use std::fs;
 
+#[macro_export]
+macro_rules! search_database {
+    (($ldb:expr) /$($con:ident)/ *) => {(|| {
+        let database = $ldb;
+        let container = database.as_container()?;
+        $(let container = container.read_container(stringify!($con))?;)*
+        let result: Result<LazyContainer, LDBError> = Ok(container);
+        container
+    })()};
+
+    (($ldb:expr) /$($con:ident)/ *.$item:ident) => {(|| {
+        let database = $ldb;
+        let container = database.as_container()?;
+        $(let container = container.read_container(stringify!($con))?;)*
+        let result: Result<LazyData, LDBError> = container.read_data(stringify!($item));
+        result
+    })()};
+}
+
 pub struct LazyDB {
     path: PathBuf,
     compressed: bool,
