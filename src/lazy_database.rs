@@ -27,9 +27,12 @@ pub struct LazyDB {
 }
 
 impl LazyDB {
-    /// Initialises a new LazyDB at a specified path.
+    /// Initialises a new LazyDB directory at a specified path.
     /// 
     /// It will create the path if it doesn't already exist and initialise a metadata file with the current version of `lazy-db` if one doesn't exist already.
+    /// 
+    /// **WARNING:** if you initialise the database this way, you cannot compile it in future without errors being thrown!
+    /// If you want to compile it, then use `LazyDB::init_db` instead.
     pub fn init(path: impl AsRef<Path>) -> Result<Self, LDBError> {
         let path = path.as_ref();
 
@@ -53,6 +56,16 @@ impl LazyDB {
             path: path.to_path_buf(),
             compressed: false,
         })
+    }
+
+    /// Initialise a new compiled `LazyDB` (compressed tarball) at the specified path.
+    ///
+    /// It will create the path if it doesn't already exist and initialise a metadata file with the current version of `lazy-db` if one doesn't exist already.
+    pub fn init_db(path: impl AsRef<Path>) -> Result<Self, LDBError> {
+        let dir_path = path.as_ref().with_extension("modb");
+        let mut this = Self::init(dir_path)?;
+        this.compressed = true;
+        Ok(this)
     }
 
     /// Loads a pre-existing LazyDB directory at a specified path.
@@ -94,7 +107,7 @@ impl LazyDB {
         let path = path.as_ref();
 
         { // Checks if other loaded version exists
-            let dir_path = path.with_extension("modify");
+            let dir_path = path.with_extension("modb");
             if dir_path.is_dir() { return Self::load_dir(dir_path) }
         }
 
@@ -112,18 +125,19 @@ impl LazyDB {
     }
 
     /// Compiles a modifiable `LazyDatabase` directory into a compressed tarball (doesn't delete the modifable directory).
-    pub fn compile(&self) -> Result<(), std::io::Error> {
+    pub fn compile(&self) -> Result<PathBuf, std::io::Error> {
         use lazy_archive::*; // imports
         let tar = self.path.with_extension("tmp.tar");
+        let new = self.path.with_extension("ldb");
 
         // Build and compress tarball
         build_tar(&self.path, &tar)?; // build tar
-        compress_file(&tar, self.path.with_extension("ldb"))?;
+        compress_file(&tar, &new)?;
 
         // Clean-up
         fs::remove_file(tar)?;
 
-        Ok(())
+        Ok(new)
     }
 
     /// Decompiles a compressed tarball `LazyDatabase` into a modifiable directory (doesn't remove the compressed tarball)
@@ -132,11 +146,11 @@ impl LazyDB {
         let path = path.as_ref();
 
         // Checks if the path exists
-        if path.is_file() { return Err(LDBError::FileNotFound(path.to_path_buf())) };
+        if !path.is_file() { return Err(LDBError::FileNotFound(path.to_path_buf())) };
 
         // Decompress and unpack
         let tar = path.with_extension("tmp.tar");
-        let unpacked = path.with_extension("modify");
+        let unpacked = path.with_extension("modb");
         unwrap_result!(decompress_file(path, &tar) => |e| Err(LDBError::IOError(e)));
         unwrap_result!(unpack_tar(&tar, &unpacked) => |e| Err(LDBError::IOError(e)));
 

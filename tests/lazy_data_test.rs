@@ -89,18 +89,17 @@ fn lazy_data_compile() {
     let og_string = String::from("Hello world!");
 
     { // Writing to the database and compiling
-        let database = LazyDB::init(&path).unwrap();
+        let database = LazyDB::init_db(&path).unwrap();
         let file = database.as_container().unwrap().data_writer("data").unwrap(); // Get file-wrapper
         LazyData::new_string(file, &og_string).unwrap(); // Writes string
         let database = database.compile().unwrap();
-        std::fs::remove_dir_all(&path).unwrap();
         path = database;
     }
 
     // Read from the database
-    // std::io::stdin().read_line(&mut String::new()).unwrap();
     let database = LazyDB::load_db(path).unwrap();
     let new_string = database.as_container().unwrap().read_data("data").unwrap().collect_string().unwrap();
+    std::io::stdin().read_line(&mut String::new()).unwrap();
 
     // Must be equal
     assert_eq!(og_string, new_string);
