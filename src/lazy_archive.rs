@@ -18,7 +18,7 @@ pub fn build_tar(path: impl AsRef<Path>, tar_path: impl AsRef<Path>) -> Result<(
 }
 
 fn recursive_tar_append(builder: &mut Builder<File>, path: impl AsRef<Path>, tar_path: PathBuf) -> Result<(), io::Error> {
-    for entry in std::fs::read_dir(path)?.into_iter().filter_map(|x| x.ok()) {
+    for entry in std::fs::read_dir(path)?.filter_map(|x| x.ok()) {
         let path = entry.path();
         let file_type = entry.file_type()?;
         if file_type.is_file() {

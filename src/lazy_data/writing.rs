@@ -24,7 +24,7 @@ macro_rules! new_number {
 
 impl LazyData {
     /// Creates a new `LazyData` file with the type of `LazyType::Void`
-    pub fn new_void(mut file: FileWrapper) -> Result<(), LDBError> {
+    pub fn new_void(mut file: FileWrapper, _value: ()) -> Result<(), LDBError> {
         file.write(&[LazyType::Void.into()])?;
         Ok(())
     }

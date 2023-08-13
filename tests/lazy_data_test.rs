@@ -33,7 +33,7 @@ fn lazy_data_new_void() {
     // Create file
     let file = FileWrapper::new_writer(File::create(&path).unwrap());
     // Write void
-    LazyData::new_void(file).unwrap();
+    LazyData::new_void(file, ()).unwrap();
     // Load void file
     let lazy_data = LazyData::load(path).unwrap();
     // Type must be void
