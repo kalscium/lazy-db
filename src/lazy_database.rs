@@ -68,4 +68,39 @@ impl LazyDB {
     pub fn as_container(&self) -> Result<LazyContainer, LDBError> {
         LazyContainer::load(&self.path)
     }
+
+    /// Compiles a modifiable `LazyDatabase` directory into a compressed tarball (doesn't delete the modifable directory).
+    pub fn compile(&self) -> Result<(), std::io::Error> {
+        use lazy_archive::*; // imports
+        let tar = self.path.with_extension("tmp.tar");
+
+        // Build and compress tarball
+        build_tar(&self.path, &tar)?; // build tar
+        compress_file(&tar, self.path.with_extension("ldb"))?;
+
+        // Clean-up
+        fs::remove_file(tar)?;
+
+        Ok(())
+    }
+
+    /// Decompiles a compressed tarball `LazyDatabase` into a modifiable directory (doesn't remove the compressed tarball)
+    pub fn decompile(path: impl AsRef<Path>) -> Result<PathBuf, LDBError> {
+        use lazy_archive::*; // imports
+        let path = path.as_ref();
+
+        // Checks if the path exists
+        if path.is_file() { return Err(LDBError::FileNotFound(path.to_path_buf())) };
+
+        // Decompress and unpack
+        let tar = path.with_extension("tmp.tar");
+        let unpacked = path.with_extension("modify");
+        unwrap_result!(decompress_file(path, &tar) => |e| Err(LDBError::IOError(e)));
+        unwrap_result!(unpack_tar(&tar, &unpacked) => |e| Err(LDBError::IOError(e)));
+
+        // Clean-up
+        unwrap_result!(fs::remove_file(tar) => |e| Err(LDBError::IOError(e)));
+        
+        Ok(unpacked)
+    }
 }
