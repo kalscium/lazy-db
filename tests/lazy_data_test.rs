@@ -4,15 +4,15 @@ use lazy_db::*;
 use std::fs::File;
 
 macro_rules! test_lazy_data {
-    ($(($name:ident) [$func:ident, $collect:ident] $value:expr => $path:expr;)*) => {
-        $(test_lazy_data!(@inner ($name) [$func, $collect] $value => $path);)*
+    ($(($name:ident) [$func:ident, $collect:ident] $value:expr;)*) => {
+        $(test_lazy_data!(@inner ($name) [$func, $collect] $value);)*
     };
 
-    (@inner ($name:ident) [$func:ident, $collect:ident] $value:expr  => $path:expr) => {
+    (@inner ($name:ident) [$func:ident, $collect:ident] $value:expr) => {
         #[test]
         fn $name() {
             let tmp = new_env();
-            let path = tmp.get_path().join($path);
+            let path = tmp.get_path().join("data.ld");
             let og = $value;
             // Create file
             let file = FileWrapper::new_writer(File::create(&path).unwrap());
@@ -41,11 +41,11 @@ fn lazy_data_new_void() {
 }
 
 test_lazy_data! {
-    (lazy_data_string) [new_string, collect_string] "Hello world!" => "new_string.ld";
-    (lazy_data_signed) [new_i32, collect_i32] -1234i32 => "new_signed.ld";
-    (lazy_data_unsigned) [new_u32, collect_u32] 3908u32 => "new_unsigned.ld";
-    (lazy_data_f32) [new_f32, collect_f32] 123.234f32 => "new_f32.ld";
-    (lazy_data_f64) [new_f64, collect_f64] 123141234.1234f64 => "new_f64.ld";
+    (lazy_data_string) [new_string, collect_string] "Hello world!";
+    (lazy_data_signed) [new_i32, collect_i32] -1234i32;
+    (lazy_data_unsigned) [new_u32, collect_u32] 3908u32;
+    (lazy_data_f32) [new_f32, collect_f32] 123.234f32;
+    (lazy_data_f64) [new_f64, collect_f64] 123141234.1234f64;
 }
 
 #[test]
@@ -65,7 +65,7 @@ fn lazy_data_binary() {
 #[test]
 fn lazy_data_database() {
     let tmp = new_env();
-    let path = tmp.get_path().join("new_database");
+    let path = tmp.get_path().join("database");
     let og_string = String::from("Hello world!");
 
     { // Writing to the database
@@ -85,7 +85,7 @@ fn lazy_data_database() {
 #[test]
 fn lazy_data_compile() {
     let tmp = new_env();
-    let mut path = tmp.get_path().join("new_compiled_database");
+    let mut path = tmp.get_path().join("database");
     let og_string = String::from("Hello world!");
 
     { // Writing to the database and compiling
@@ -107,7 +107,7 @@ fn lazy_data_compile() {
 #[test]
 fn lazy_data_compile_nested() {
     let tmp = new_env();
-    let mut path = tmp.get_path().join("new_nested_compiled_database");
+    let mut path = tmp.get_path().join("database");
     let og_string = String::from("Hello world!");
 
     { // Writing to the database and compiling
