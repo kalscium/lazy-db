@@ -36,7 +36,7 @@ impl LazyDB {
         })
     }
 
-    /// Loads an pre-existing LazyDB directory at a specified path.
+    /// Loads a pre-existing LazyDB directory at a specified path.
     /// 
     /// Loads LazyDB as `read-write` allowing for modification of the data within it.
     /// 
@@ -62,6 +62,29 @@ impl LazyDB {
             path: path.to_path_buf(),
             compressed: false,
         })
+    }
+
+    /// Loads a pre-existing LazyDB file (compressed tarball) at a specified path
+    /// 
+    /// Loads LazyDB as `read-write` allowing for modification of the data within it.
+    /// 
+    /// If a directory version of the LazyDatabase exists, it will load the directory version instead of decompiling.
+    /// 
+    /// If the LazyDB is invalid, it will return an error.
+    pub fn load_db(path: impl AsRef<Path>) -> Result<Self, LDBError> {
+        let path = path.as_ref();
+
+        { // Checks if other loaded version exists
+            let dir_path = path.with_extension("modify");
+            if dir_path.is_dir() { return Self::load_dir(dir_path) }
+        }
+
+        // Decompiles database
+        let path = Self::decompile(path)?;
+        let mut ldb = Self::load_dir(path)?;
+        ldb.compressed = true;
+
+        Ok(ldb)
     }
 
     #[inline]
@@ -102,5 +125,14 @@ impl LazyDB {
         unwrap_result!(fs::remove_file(tar) => |e| Err(LDBError::IOError(e)));
         
         Ok(unpacked)
+    }
+}
+
+impl Drop for LazyDB {
+    fn drop(&mut self) {
+        if !self.compressed { return }; // If not compressed do nothing
+        let ok = self.compile().is_ok();
+        if !ok { return }; // Don't delete if not ok
+        let _ = fs::remove_dir_all(&self.path);
     }
 }
