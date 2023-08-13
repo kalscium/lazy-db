@@ -4,6 +4,7 @@ use std::fs;
 
 pub struct LazyDB {
     path: PathBuf,
+    compressed: bool,
 }
 
 impl LazyDB {
@@ -31,6 +32,7 @@ impl LazyDB {
         // Construct Self
         Ok(Self {
             path: path.to_path_buf(),
+            compressed: false,
         })
     }
 
@@ -58,6 +60,7 @@ impl LazyDB {
         // Constructs Self
         Ok(Self {
             path: path.to_path_buf(),
+            compressed: false,
         })
     }
 

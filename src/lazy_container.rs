@@ -59,7 +59,7 @@ impl LazyContainer {
     pub fn read_data(&self, key: impl AsRef<Path>) -> Result<LazyData, LDBError> {
         let path = self.path.join(key);
         if !path.is_file() { return Err(LDBError::FileNotFound(path)) };
-        Ok(LazyData::load(path)?)
+        LazyData::load(path)
     }
 
     /// Reads nexted `LazyContainer` within this container
