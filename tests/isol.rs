@@ -40,7 +40,6 @@ impl Display for TmpPath {
 
 impl Drop for TmpPath {
     fn drop(&mut self) {
-        // Ignore errors
-        let _ = fs::remove_dir_all(&self.0);
+        fs::remove_dir_all(&self.0).unwrap();
     }
 }

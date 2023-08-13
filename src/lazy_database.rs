@@ -17,6 +17,12 @@ macro_rules! search_database {
         let result: Result<LazyData, LDBError> = container.read_data(stringify!($item));
         result
     })()};
+
+    (($ldb:expr) $item:ident) => {(|| {
+        let database = $ldb;
+        let container = database.as_container()?;
+        container.read_data(stringify!($item))
+    })()};
 }
 
 #[macro_export]
