@@ -2,6 +2,7 @@ use crate::*;
 use std::path::{Path, PathBuf};
 use std::fs;
 
+/// Used for reading from a `LazyDB` with less boiler-plate
 #[macro_export]
 macro_rules! search_database {
     (($ldb:expr) /$($($con:ident)?$(($can:expr))?)/ *) => {(|| {
@@ -31,6 +32,7 @@ macro_rules! search_database {
     })()};
 }
 
+/// Used for reading from a `LazyDB` with less boiler-plate
 #[macro_export]
 macro_rules! write_database {
     (($ldb:expr) $($item:ident)?$(($obj:expr))? = $func:ident($value:expr)) => {(|| {
