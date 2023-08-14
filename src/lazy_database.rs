@@ -7,21 +7,27 @@ macro_rules! search_database {
     (($ldb:expr) /$($($con:ident)?$(($can:expr))?)/ *) => {(|| {
         let database = $ldb;
         let container = database.as_container()?;
-        $(let container = container.read_container($(stringify!($con))?$($can)?)?;)*
+        $(
+            $(let container = container.read_container(stringify!($con))?;)?
+            $(let container = container.read_container($can)?;)?
+        )*
         let result: Result<LazyContainer, LDBError> = Ok(container);
         result
     })()};
 
     (($ldb:expr) /$($($con:ident)?$(($can:expr))?)/ *::$($item:ident)?$(($obj:expr))?) => {(|| {
         let container = search_database!(($ldb) /$($($con)?$(($can))?)/ *)?;
-        let result: Result<LazyData, LDBError> = container.read_data(stringify!($($item)?$($obj)?));
+        $(let result: Result<LazyData, LDBError> = container.read_data(stringify!($item));)?
+        $(let result: Result<LazyData, LDBError> = container.read_data($obj);)?
         result
     })()};
 
     (($ldb:expr) $($item:ident)?$(($obj:expr))?) => {(|| {
         let database = $ldb;
         let container = database.as_container()?;
-        container.read_data(stringify!($($item)?$($obj)?))
+        $(let result: Result<LazyData, LDBError> = container.read_data(stringify!($item));)?
+        $(let result: Result<LazyData, LDBError> = container.read_data($obj);)?
+        result
     })()};
 }
 
@@ -40,9 +46,9 @@ macro_rules! write_database {
         let mut container = database.as_container()?;
         $({
             let con = $(stringify!($con))?$($can)?;
-            container = match container.read_container(stringify!(con)) {
+            container = match container.read_container(con) {
                 Ok(x) => x,
-                Err(LDBError::DirNotFound(_)) => container.new_container(stringify!(con))?,
+                Err(LDBError::DirNotFound(_)) => container.new_container(con)?,
                 Err(e) => return Err(e),
             }
         };)*
