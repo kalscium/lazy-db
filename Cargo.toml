@@ -1,7 +1,9 @@
 [package]
 name = "lazy-db"
-version = "0.1.0"
+version = "1.0.0"
 edition = "2021"
+license = "MIT OR Apache-2.0"
+description = "A simple, bare-bones and lazily loaded database for small projects"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
