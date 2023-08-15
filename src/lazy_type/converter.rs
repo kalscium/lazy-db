@@ -26,6 +26,7 @@ impl TryFrom<u8> for LazyType {
             14 => F64,
             15 => True,
             16 => False,
+            17 => Link,
             _ => return Err(LDBError::InvalidLazyType(byte)),
         })
     }
@@ -52,6 +53,7 @@ impl From<LazyType> for u8 {
             F64 => 14,
             True => 15,
             False => 16,
+            Link => 17,
         }
     }
 }

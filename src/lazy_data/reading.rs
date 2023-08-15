@@ -180,4 +180,25 @@ impl LazyData {
             _ => Err(LDBError::IncorrectType(self.lazy_type, String::from("Boolean"))),
         }
     }
+
+    /// ### Inexpensive Action
+    /// ( Loads `LazyData` specified at path )
+    /// 
+    /// ---
+    /// Collects the `LazyData` as a path and converts that into another `LazyData`.
+    pub fn collect_link(self, database: LazyDB) -> Result<LazyData, LDBError> {
+        incorrect_type!(self.lazy_type, LazyType::Link);
+
+        // Loads string as a path
+        // Expensive and best to be avoided if possible
+        let bytes = self.wrapper.read_to_end()?;
+        
+        let string = if let Ok(x) = String::from_utf8(bytes.to_vec()) {
+            x
+        } else {
+            return Err(LDBError::InvalidUTF8String(bytes))
+        };
+
+        database.as_container()?.read_data(string)
+    }
 }

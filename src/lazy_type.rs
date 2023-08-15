@@ -21,4 +21,5 @@ pub enum LazyType {
     F64,
     True,
     False,
+    Link,
 }
