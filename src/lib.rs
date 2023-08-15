@@ -15,6 +15,8 @@
 //! ### Some basic usage
 //! Here is a really basic `LazyDB` that holds some information about a hypothetical person named *'Dave'*
 //! ```rust
+//! use lazy_db::*;
+//! 
 //! let path = "example_db"; // path to the database
 //! let database = LazyDB::init_db(path).unwrap(); // initialise the database
 //! 
