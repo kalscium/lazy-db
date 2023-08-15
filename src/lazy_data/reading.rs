@@ -165,4 +165,19 @@ impl LazyData {
 
         Ok(value)
     }
+
+    /// ### Inexpensive Action
+    /// ( Just reads the type field of `LazyData` )
+    /// 
+    /// ---
+    /// Collects the `LazyData` as a boolean
+    /// 
+    /// Returns `LDBError::IncorrectType` if the type is not of boolean
+    pub fn collect_bool(self) -> Result<bool, LDBError> {
+        match self.lazy_type {
+            LazyType::True => Ok(true),
+            LazyType::False => Ok(false),
+            _ => Err(LDBError::IncorrectType(self.lazy_type, String::from("Boolean"))),
+        }
+    }
 }

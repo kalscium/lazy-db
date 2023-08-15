@@ -46,7 +46,7 @@ fn lazy_data_compile_nested() {
     let og_string = String::from("Hello world!");
 
     // Writing to the database and compiling
-    let database = LazyDB::init_db(&path).unwrap();
+    let database = LazyDB::init_db(path).unwrap();
     write_database!((&database) /("nested")::data = new_string(&og_string)).unwrap(); // Writes to database with macro
     let path = database.compile().unwrap();
 

@@ -19,4 +19,6 @@ pub enum LazyType {
     U128,
     F32,
     F64,
+    True,
+    False,
 }

@@ -74,4 +74,13 @@ impl LazyData {
         file.write(&[LazyType::Binary.into()])?;
         file.write(value)
     }
+
+    /// Creates a new `LazyData` file with a `bool` value and type
+    pub fn new_bool(mut file: FileWrapper, value: bool) -> Result<(), LDBError> {
+        if value {
+            file.write(&[LazyType::True.into()])
+        } else {
+            file.write(&[LazyType::False.into()])
+        }
+    }
 }
