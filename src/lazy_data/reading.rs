@@ -11,7 +11,7 @@ macro_rules! incorrect_type {
 
 macro_rules! collect_number {
     (($name:ident) $type:ty = $lazy_type:pat) => {
-         /// ### Expensive Action
+        /// ### Expensive Action
         /// ( Loads the entire file's data into memory  )
         /// 
         /// ---

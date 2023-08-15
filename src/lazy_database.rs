@@ -159,6 +159,7 @@ impl LazyDB {
         Ok(ldb)
     }
 
+    /// Gets the 'root' container of the `LazyDB`
     #[inline]
     pub fn as_container(&self) -> Result<LazyContainer, LDBError> {
         LazyContainer::load(&self.path)

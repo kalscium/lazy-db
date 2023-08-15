@@ -3,7 +3,7 @@ use isol::*;
 use lazy_db::*;
 
 #[test]
-fn lazy_database_database() {
+fn lazy_database() {
     let tmp = new_env();
     let path = tmp.get_path().join("database");
     let og_string = String::from("Hello world!");
