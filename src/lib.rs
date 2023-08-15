@@ -1,5 +1,4 @@
-//! # `lazy-db`
-//! **A simple, bare-bones and lazily loaded database for small projects**
+//! > **A simple, bare-bones and lazily loaded database for small projects**
 //! 
 //! ## Concepts
 //! This will be quite short as `lazy-db` is *bare-bones*.
