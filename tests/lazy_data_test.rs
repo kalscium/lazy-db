@@ -29,7 +29,7 @@ macro_rules! test_lazy_data {
 #[test]
 fn lazy_data_new_void() {
     let tmp = new_env();
-    let path = tmp.get_path().join("new_void.ld");
+    let path = tmp.get_path().join("data.ld");
     // Create file
     let file = FileWrapper::new_writer(File::create(&path).unwrap());
     // Write void
@@ -51,7 +51,7 @@ test_lazy_data! {
 #[test]
 fn lazy_data_binary() {
     let tmp = new_env();
-    let path = tmp.get_path().join("new_binary.ld");
+    let path = tmp.get_path().join("data.ld");
     let og_bin = Box::new([12u8, 234, 48, 128]);
     // Create binary file
     let file = FileWrapper::new_writer(File::create(&path).unwrap());
@@ -60,4 +60,34 @@ fn lazy_data_binary() {
     let new_bin = LazyData::load(path).unwrap().collect_binary().unwrap();
     // Two values must be the same
     assert_eq!(*og_bin, *new_bin);
+}
+
+#[test]
+fn lazy_data_link() {
+    let tmp = new_env();
+    let path = tmp.get_path().join("database");
+    let database = LazyDB::init_db(path).unwrap();
+    let old_data = String::from("Hello world");
+    write_database!((&database) /nested::data = new_string(&old_data)).unwrap();
+    write_database!((&database) link = new_link("nested/data")).unwrap();
+
+    // Reading the link
+    let data = search_database!((&database) link).unwrap().collect_link(database).unwrap();
+    let new_data = data.collect_string().unwrap();
+
+    // Values must be equal
+    assert_eq!(old_data, new_data);
+}
+
+#[test]
+fn lazy_data_bool() {
+    let tmp = new_env();
+    let path = tmp.get_path().join("data.ld");
+    // Create file
+    let file = FileWrapper::new_writer(File::create(&path).unwrap());
+    LazyData::new_bool(file, true).unwrap();
+    // Load bool
+    let loaded = LazyData::load(path).unwrap().collect_bool().unwrap();
+    // Bool should be true
+    assert!(loaded);
 }

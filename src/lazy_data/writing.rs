@@ -87,8 +87,8 @@ impl LazyData {
     }
 
     /// Creates a new `LazyData` file with a link (it's like a reference) value and type
-    pub fn new_link(mut file: FileWrapper, data: LazyData) -> Result<(), LDBError> {
+    pub fn new_link(mut file: FileWrapper, data: impl AsRef<Path>) -> Result<(), LDBError> {
         file.write(&[LazyType::Link.into()])?;
-        file.write(data.get_path().as_os_str().as_bytes())
+        file.write(data.as_ref().as_os_str().as_bytes())
     }
 }
