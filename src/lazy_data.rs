@@ -36,4 +36,8 @@ impl LazyData {
             wrapper: reader,
         })
     }
+
+    pub fn get_path(&self) -> PathBuf {
+        self.path.clone()
+    }
 }
