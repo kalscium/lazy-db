@@ -55,7 +55,8 @@ macro_rules! write_database {
             }
         };)*
 
-        LazyData::$func(container.data_writer($(stringify!($item))?)?$($obj)?, $value)?;
+        $(LazyData::$func(container.data_writer(stringify!($item))?, $value)?;)?
+        $(LazyData::$func(container.data_writer($obj)?, $value)?;)?
         Result::<(), LDBError>::Ok(())
     })()}
 }

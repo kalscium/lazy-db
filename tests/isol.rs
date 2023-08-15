@@ -10,9 +10,10 @@ pub fn new_env() -> TmpPath {
     let path = Path::new("./test_tmp/");
     if !path.exists() {
         fs::create_dir_all(path).expect("Error: couldn't create directory!");
-    }; let rand = RandomState::new().build_hasher().finish();
-    TmpPath::new(format!("./test_tmp/{rand}"))
+    }; TmpPath::new(format!("./test_tmp/{}", gen_random()))
 }
+
+pub fn gen_random() -> u64 { RandomState::new().build_hasher().finish() }
 
 pub struct TmpPath(PathBuf);
 
