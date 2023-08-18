@@ -42,7 +42,7 @@ impl LazyContainer {
     pub fn data_writer(&self, key: impl AsRef<Path>) -> Result<FileWrapper, LDBError> {
         let path = self.path.join(key);
         if path.is_file() { let _ = fs::remove_file(&path); }; // if files exists try remove it
-        let file = unwrap_result!(fs::File::create(path) => |e| Err(LDBError::IOError(e)));
+        let file = unwrap_result!((fs::File::create(path)) err => LDBError::IOError(err));
         Ok(FileWrapper::new_writer(file))
     }
 
@@ -52,7 +52,7 @@ impl LazyContainer {
     pub fn new_container(&self, key: impl AsRef<Path>) -> Result<LazyContainer, LDBError> {
         let path = self.path.join(&key);
         if path.is_dir() { return self.read_container(key) }; // If exists load instead
-        Ok(unwrap_result!(LazyContainer::init(path) => |e| Err(LDBError::IOError(e))))
+        Ok(unwrap_result!((LazyContainer::init(path)) err => LDBError::IOError(err)))
     }
 
     /// Reads nested `LazyData` within this container

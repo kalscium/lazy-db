@@ -67,10 +67,10 @@ macro_rules! const_eval {
 
 #[macro_export]
 macro_rules! unwrap_result {
-    ($result:expr => $wrapper:expr) => {{
-        let result = $result;
-        if let Err(e) = result {
-            return $wrapper(e);
-        } result.unwrap()
-    }}
+    (($result:expr) $err:ident => $wrapper:expr) => {
+        match $result {
+            Ok(x) => x,
+            Err($err) => return Err($wrapper),
+        }
+    }
 }

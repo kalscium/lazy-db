@@ -24,18 +24,18 @@ impl FileWrapper {
 
     /// Writes a byte slice into the file
     pub fn write(&mut self, byte: &[u8]) -> Result<(), LDBError> {
-        let writer = if let Self::Writer(w) = self { w }
+        let mut writer = if let Self::Writer(w) = self { w }
             else { panic!("You cannot write on a reader") }; // Change later to use better error handling
-        unwrap_result!(writer.write(byte) => |e| Err(LDBError::IOError(e)));
+        unwrap_result!((Write::write_all(&mut writer, byte)) err => LDBError::IOError(err));
         Ok(())
     }
 
     /// Reads a set amount of bytes from a file by padding out undefined portions with 0u8
     pub fn read(&mut self, length: usize) -> Result<Box<[u8]>, LDBError> {
-        let reader = if let Self::Reader(r) = self { r }
+        let mut reader = if let Self::Reader(r) = self { r }
             else { panic!("You cannot read on a writer") }; // Change later to use better error handling
         let mut buffer = vec![0u8; length].into_boxed_slice();
-        unwrap_result!(reader.read(&mut buffer) => |e| Err(LDBError::IOError(e)));
+        unwrap_result!((Read::read_exact(&mut reader, &mut buffer)) err => LDBError::IOError(err));
         Ok(buffer)
     }
 
@@ -53,7 +53,7 @@ impl FileWrapper {
         let mut reader = if let Self::Reader(r) = self { r }
             else { panic!("You cannot read on a writer") }; // Change later to use better error handling
         let mut buffer = Vec::new();
-        unwrap_result!(reader.read_to_end(&mut buffer) => |e| Err(LDBError::IOError(e)));
+        unwrap_result!((reader.read_to_end(&mut buffer)) err => LDBError::IOError(err));
         Ok(buffer.into_boxed_slice())
     }
 }

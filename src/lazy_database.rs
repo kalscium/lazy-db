@@ -77,7 +77,7 @@ impl LazyDB {
         let path = path.as_ref();
 
         // Check if path exists or not if init it
-        if !path.is_dir() { unwrap_result!(fs::create_dir_all(path) => |e| Err(LDBError::IOError(e))) };
+        if !path.is_dir() { unwrap_result!((fs::create_dir_all(path)) err => LDBError::IOError(err)) };
         
         { // Check if `.meta` file exists if not 
             let meta = path.join(".meta");
@@ -85,7 +85,7 @@ impl LazyDB {
                 // Write version
                 LazyData::new_binary(
                     FileWrapper::new_writer(
-                        unwrap_result!(fs::File::create(meta) => |e| Err(LDBError::IOError(e)))
+                        unwrap_result!((fs::File::create(meta)) err => LDBError::IOError(err))
                     ), &[VERSION.major, VERSION.minor, VERSION.build],
                 )?;
             }
@@ -192,11 +192,11 @@ impl LazyDB {
         // Decompress and unpack
         let tar = path.with_extension("tmp.tar");
         let unpacked = path.with_extension("modb");
-        unwrap_result!(decompress_file(path, &tar) => |e| Err(LDBError::IOError(e)));
-        unwrap_result!(unpack_tar(&tar, &unpacked) => |e| Err(LDBError::IOError(e)));
+        unwrap_result!((decompress_file(path, &tar)) err => LDBError::IOError(err));
+        unwrap_result!((unpack_tar(&tar, &unpacked)) err => LDBError::IOError(err));
 
         // Clean-up
-        unwrap_result!(fs::remove_file(tar) => |e| Err(LDBError::IOError(e)));
+        unwrap_result!((fs::remove_file(tar)) err => LDBError::IOError(err));
         
         Ok(unpacked)
     }
