@@ -55,7 +55,7 @@ pub use crate::{
     lazy_trait::*,
 };
 
-pub const VERSION: version::Version = version::Version::new(1, 0, 2);
+pub const VERSION: version::Version = version::Version::new(1, 2, 0);
 
 #[macro_export]
 macro_rules! const_eval {
