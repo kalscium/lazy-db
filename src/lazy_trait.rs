@@ -15,7 +15,7 @@ macro_rules! cache_field {
 
 #[allow(drop_bounds)]
 pub trait LazyObject: Drop {
-    fn as_container(&self) -> LazyContainer;
+    fn as_container(&self) -> &LazyContainer;
     fn store_lazy(&self) -> Result<(), LDBError>;
     fn load_lazy(container: LazyContainer) -> Self;
     fn clear_cache(&mut self);
