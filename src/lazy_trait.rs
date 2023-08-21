@@ -8,7 +8,7 @@ macro_rules! cache_field {
             let $this = self;
             if $this.$name.is_none() {
                 $this.$name = Some($code);
-            }; $this.$name.as_mut_ref().unwrap()
+            }; $this.$name.as_mut().unwrap()
         }
     }
 }
