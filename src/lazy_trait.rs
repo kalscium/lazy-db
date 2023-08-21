@@ -4,11 +4,11 @@ use crate::*;
 macro_rules! cache_field {
     ($name:ident($this:ident, $logger:ident) -> $type:ty $code:block) => {
         #[allow(unused_mut)]
-        pub fn $name(&mut self, mut $logger: impl Logger) -> &$type {
+        pub fn $name(&mut self, mut $logger: impl Logger) -> &mut $type {
             let $this = self;
             if $this.$name.is_none() {
                 $this.$name = Some($code);
-            }; $this.$name.as_ref().unwrap()
+            }; $this.$name.as_mut_ref().unwrap()
         }
     }
 }
