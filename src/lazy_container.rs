@@ -2,6 +2,61 @@ use crate::*;
 use std::path::{Path, PathBuf};
 use std::fs;
 
+/// Used for reading from a `LazyContainer` with less boiler-plate
+#[macro_export]
+macro_rules! write_container {
+    (($container:expr) $($item:ident)?$(($obj:expr))? = $func:ident($value:expr)) => {(|| {
+        let container = &$container;
+        $(LazyData::$func(container.data_writer(stringify!($item))?, $value)?;)?
+        $(LazyData::$func(container.data_writer($obj)?, $value)?;)?
+        Result::<(), LDBError>::Ok(())
+    })()};
+
+    (($container:expr) /$($($con:ident)?$(($can:expr))?)/ *::$($item:ident)?$(($obj:expr))? = $func:ident($value:expr)) => {(|| {
+        let mut container = &mut $container;
+        $({
+            let con = $(stringify!($con))?$($can)?;
+            container = match container.read_container(con) {
+                Ok(x) => x,
+                Err(LDBError::DirNotFound(_)) => container.new_container(con)?,
+                Err(e) => return Err(e),
+            }
+        };)*
+
+        $(LazyData::$func(container.data_writer(stringify!($item))?, $value)?;)?
+        $(LazyData::$func(container.data_writer($obj)?, $value)?;)?
+        Result::<(), LDBError>::Ok(())
+    })()}
+}
+
+/// Used for reading from a `LazyDB` with less boiler-plate
+#[macro_export]
+macro_rules! search_container {
+    (($container:expr) /$($($con:ident)?$(($can:expr))?)/ *) => {(|| {
+        let container = &$container;
+        $(
+            $(let container = container.read_container(stringify!($con))?;)?
+            $(let container = container.read_container($can)?;)?
+        )*
+        let result: Result<LazyContainer, LDBError> = Ok(container);
+        result
+    })()};
+
+    (($container:expr) /$($($con:ident)?$(($can:expr))?)/ *::$($item:ident)?$(($obj:expr))?) => {(|| {
+        let container = search_database!(($container) /$($($con)?$(($can))?)/ *)?;
+        $(let result: Result<LazyData, LDBError> = container.read_data(stringify!($item));)?
+        $(let result: Result<LazyData, LDBError> = container.read_data($obj);)?
+        result
+    })()};
+
+    (($container:expr) $($item:ident)?$(($obj:expr))?) => {(|| {
+        let container = &$container;
+        $(let result: Result<LazyData, LDBError> = container.read_data(stringify!($item));)?
+        $(let result: Result<LazyData, LDBError> = container.read_data($obj);)?
+        result
+    })()};
+}
+
 /// A wrapper for a directory that holds individual `LazyData` files
 pub struct LazyContainer {
     path: PathBuf,
