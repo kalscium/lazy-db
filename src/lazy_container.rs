@@ -29,7 +29,7 @@ macro_rules! write_container {
     })()}
 }
 
-/// Used for reading from a `LazyDB` with less boiler-plate
+/// Used for reading from a `LazyContainer` with less boiler-plate
 #[macro_export]
 macro_rules! search_container {
     (($container:expr) /$($($con:ident)?$(($can:expr))?)/ *) => {(|| {

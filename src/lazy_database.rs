@@ -145,15 +145,14 @@ impl LazyDB {
     /// If the LazyDB is invalid, it will return an error.
     pub fn load_db(path: impl AsRef<Path>) -> Result<Self, LDBError> {
         let path = path.as_ref();
+        let mod_path = path.with_extension("modb");
 
-        { // Checks if other loaded version exists
-            let dir_path = path.with_extension("modb");
-            if dir_path.is_dir() { return Self::load_dir(dir_path) }
-        }
+        // Checks if other loaded version exists
+        if mod_path.is_dir() { return Self::load_dir(mod_path) }
 
         // Decompiles database
-        let path = Self::decompile(path)?;
-        let mut ldb = Self::load_dir(path)?;
+        Self::decompile(path, &mod_path)?;
+        let mut ldb = Self::load_dir(mod_path)?;
         ldb.compressed = true;
 
         Ok(ldb)
@@ -165,24 +164,28 @@ impl LazyDB {
         LazyContainer::load(&self.path)
     }
 
+    #[inline]
+    pub fn path(&self) -> &Path {
+        &self.path
+    }
+
     /// Compiles a modifiable `LazyDatabase` directory into a compressed tarball (doesn't delete the modifable directory).
-    pub fn compile(&self) -> Result<PathBuf, std::io::Error> {
+    pub fn compile(&self, out_path: impl AsRef<Path>) -> Result<(), std::io::Error> {
         use lazy_archive::*; // imports
         let tar = self.path.with_extension("tmp.tar");
-        let new = self.path.with_extension("ldb");
 
         // Build and compress tarball
         build_tar(&self.path, &tar)?; // build tar
-        compress_file(&tar, &new)?;
+        compress_file(&tar, &out_path)?;
 
         // Clean-up
         fs::remove_file(tar)?;
 
-        Ok(new)
+        Ok(())
     }
 
     /// Decompiles a compressed tarball `LazyDatabase` into a modifiable directory (doesn't remove the compressed tarball)
-    pub fn decompile(path: impl AsRef<Path>) -> Result<PathBuf, LDBError> {
+    pub fn decompile(path: impl AsRef<Path>, out_path: impl AsRef<Path>) -> Result<(), LDBError> {
         use lazy_archive::*; // imports
         let path = path.as_ref();
 
@@ -191,21 +194,20 @@ impl LazyDB {
 
         // Decompress and unpack
         let tar = path.with_extension("tmp.tar");
-        let unpacked = path.with_extension("modb");
         unwrap_result!((decompress_file(path, &tar)) err => LDBError::IOError(err));
-        unwrap_result!((unpack_tar(&tar, &unpacked)) err => LDBError::IOError(err));
+        unwrap_result!((unpack_tar(&tar, out_path)) err => LDBError::IOError(err));
 
         // Clean-up
         unwrap_result!((fs::remove_file(tar)) err => LDBError::IOError(err));
         
-        Ok(unpacked)
+        Ok(())
     }
 }
 
 impl Drop for LazyDB {
     fn drop(&mut self) {
         if !self.compressed { return }; // If not compressed do nothing
-        let ok = self.compile().is_ok();
+        let ok = self.compile(self.path.with_extension("ldb")).is_ok();
         if !ok { return }; // Don't delete if not ok
         let _ = fs::remove_dir_all(&self.path);
     }
