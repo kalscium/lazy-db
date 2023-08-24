@@ -6,7 +6,7 @@ use std::fs;
 #[macro_export]
 macro_rules! search_database {
     (($ldb:expr) /$($($con:ident)?$(($can:expr))?)/ *) => {(|| {
-        let database = $ldb;
+        let database = &$ldb;
         let container = database.as_container()?;
         $(
             $(let container = container.read_container(stringify!($con))?;)?
@@ -24,7 +24,7 @@ macro_rules! search_database {
     })()};
 
     (($ldb:expr) $($item:ident)?$(($obj:expr))?) => {(|| {
-        let database = $ldb;
+        let database = &$ldb;
         let container = database.as_container()?;
         $(let result: Result<LazyData, LDBError> = container.read_data(stringify!($item));)?
         $(let result: Result<LazyData, LDBError> = container.read_data($obj);)?
@@ -36,7 +36,7 @@ macro_rules! search_database {
 #[macro_export]
 macro_rules! write_database {
     (($ldb:expr) $($item:ident)?$(($obj:expr))? = $func:ident($value:expr)) => {(|| {
-        let database = $ldb;
+        let database = &$ldb;
         let container = database.as_container()?;
         $(LazyData::$func(container.data_writer(stringify!($item))?, $value)?;)?
         $(LazyData::$func(container.data_writer($obj)?, $value)?;)?
@@ -44,7 +44,7 @@ macro_rules! write_database {
     })()};
 
     (($ldb:expr) /$($($con:ident)?$(($can:expr))?)/ *::$($item:ident)?$(($obj:expr))? = $func:ident($value:expr)) => {(|| {
-        let database = $ldb;
+        let database = &$ldb;
         let mut container = database.as_container()?;
         $({
             let con = $(stringify!($con))?$($can)?;
