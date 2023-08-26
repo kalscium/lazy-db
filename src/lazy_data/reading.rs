@@ -67,6 +67,44 @@ macro_rules! collect_number {
    }
 }
 
+macro_rules! collect_array {
+    (($name:ident) $type:ty = $lazy_type:ident) => {
+        collect_array!(($name, <$type>::BITS as usize / 8usize) $type = $lazy_type);
+    };
+
+    (($name:ident, $bytes:expr) $type:ty = $lazy_type:ident) => {
+        /// ### Expensive Action
+        /// ( Loads the entire file's data into memory  )
+        /// 
+        /// ---
+        /// Collects the `LazyData` as an array of values of a single type
+        /// 
+        /// Returns `LDBError::IncorrectType` if the LazyData type is not the correct array type
+        pub fn $name(mut self) -> Result<Box<[$type]>, LDBError> {
+            incorrect_type!(self.lazy_type, LazyType::Array);
+
+            // Read array-type
+            let array_type =
+                LazyType::try_from(self.wrapper.read(1)?[0])?;
+            incorrect_type!(array_type, LazyType::$lazy_type);
+
+            const LENGTH: usize = $bytes;
+            let mut result = Vec::<$type>::new();
+            loop {
+                let bytes = match self.wrapper.read_opt(LENGTH)? {
+                    Some(x) => x,
+                    None => break,
+                };
+                // Convert to number
+                let value = <$type>::from_be_bytes(unsafe { *(bytes.as_ptr() as *const [u8; LENGTH]) });
+                result.push(value);
+            }
+
+            Ok(result.into_boxed_slice())
+        }
+    };
+}
+
 impl LazyData {
     /// ### Expensive Action
     /// ( Reads all of the contents of the file and stores it on the heap )
@@ -113,6 +151,20 @@ impl LazyData {
     collect_number!(signed (collect_i32) i32 = LazyType::I32);
     collect_number!(signed (collect_i64) i64 = LazyType::I64);
     collect_number!(signed (collect_i128) i128 = LazyType::I128);
+
+    // Arrays
+    collect_array!((collect_u8_array) u8 = U8);
+    collect_array!((collect_u16_array) u16 = U16);
+    collect_array!((collect_u32_array) u32 = U32);
+    collect_array!((collect_u64_array) u64 = U64);
+    collect_array!((collect_u128_array) u128 = U128);
+    collect_array!((collect_i8_array) i8 = I8);
+    collect_array!((collect_i16_array) i16 = I16);
+    collect_array!((collect_i32_array) i32 = I32);
+    collect_array!((collect_i64_array) i64 = I64);
+    collect_array!((collect_i128_array) i128 = I128);
+    collect_array!((collect_f32_array, 4) f32 = F32);
+    collect_array!((collect_f64_array, 8) f64 = F64);
 
     /* Floating point numbers */
 

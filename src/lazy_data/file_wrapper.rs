@@ -39,6 +39,15 @@ impl FileWrapper {
         Ok(buffer)
     }
 
+    pub fn read_opt(&mut self, length: usize) -> Result<Option<Box<[u8]>>, LDBError> {
+        let reader = if let Self::Reader(r) = self { r }
+            else { panic!("You cannot read on a writer") }; // Change later to use better error handling
+        let mut buffer = vec![0u8; length].into_boxed_slice();
+        let read = unwrap_result!((reader.read(&mut buffer)) err => LDBError::IOError(err));
+        if read < length { Ok(None) }
+        else { Ok(Some(buffer)) }
+    }
+
     /// Deconstruct the wrapper properly with all of the buffers and such
     pub fn finish(self) -> Result<(), Error> {
         match self {

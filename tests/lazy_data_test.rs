@@ -17,7 +17,7 @@ macro_rules! test_lazy_data {
             // Create file
             let file = FileWrapper::new_writer(File::create(&path).unwrap());
             // Write to file
-            LazyData::$func(file, og.clone()).unwrap();
+            LazyData::$func(file, og).unwrap();
             // Load file
             let new = LazyData::load(path).unwrap().$collect().unwrap();
             // Values must be the same
@@ -46,6 +46,7 @@ test_lazy_data! {
     (lazy_data_unsigned) [new_u32, collect_u32] 3908u32;
     (lazy_data_f32) [new_f32, collect_f32] 123.234f32;
     (lazy_data_f64) [new_f64, collect_f64] 123141234.1234f64;
+    (lazy_data_bool) [new_bool, collect_bool] true;
 }
 
 #[test]
@@ -80,14 +81,16 @@ fn lazy_data_link() {
 }
 
 #[test]
-fn lazy_data_bool() {
+fn lazy_data_array() {
     let tmp = new_env();
     let path = tmp.get_path().join("data.ld");
+    let og = [32, -42, 86, -12093];
     // Create file
     let file = FileWrapper::new_writer(File::create(&path).unwrap());
-    LazyData::new_bool(file, true).unwrap();
-    // Load bool
-    let loaded = LazyData::load(path).unwrap().collect_bool().unwrap();
-    // Bool should be true
-    assert!(loaded);
+    // Write to file
+    LazyData::new_i32_array(file, &og).unwrap();
+    // Load file
+    let new = LazyData::load(path).unwrap().collect_i32_array().unwrap();
+    // Values must be the same
+    let _ = og.iter().enumerate().map(|(i, x)| assert_eq!(*x, new[i]));
 }

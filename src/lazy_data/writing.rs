@@ -24,6 +24,20 @@ macro_rules! new_number {
     };
 }
 
+macro_rules! new_array {
+    (($name:ident) $type:ty = $lazy_type:ident) => {
+        /// Creates a new `LazyData` file with an array type and value
+        pub fn $name(mut file: FileWrapper, value: &[$type]) -> Result<(), LDBError> {
+            file.write(&[LazyType::Array.into(), LazyType::$lazy_type.into()])?;
+            for i in value {
+                let bytes = i.to_be_bytes();
+                file.write(&bytes)?;
+            }
+            Ok(())
+        }
+    }
+}
+
 impl LazyData {
     /// Creates a new `LazyData` file with the type of `LazyType::Void`
     pub fn new_void(mut file: FileWrapper, _value: ()) -> Result<(), LDBError> {
@@ -52,6 +66,20 @@ impl LazyData {
     new_number!((new_u32) u32 = LazyType::U32);
     new_number!((new_u64) u64 = LazyType::U64);
     new_number!((new_u128) u128 = LazyType::U128);
+
+    // Arrays
+    new_array!((new_u8_array) u8 = U8);
+    new_array!((new_u16_array) u16 = U16);
+    new_array!((new_u32_array) u32 = U32);
+    new_array!((new_u64_array) u64 = U64);
+    new_array!((new_u128_array) u128 = U128);
+    new_array!((new_i8_array) i8 = I8);
+    new_array!((new_i16_array) i16 = I16);
+    new_array!((new_i32_array) i32 = I32);
+    new_array!((new_i64_array) i64 = I64);
+    new_array!((new_i128_array) i128 = I128);
+    new_array!((new_f32_array) f32 = F32);
+    new_array!((new_f64_array) f64 = F64);
 
     /* Floating point numbers */
 

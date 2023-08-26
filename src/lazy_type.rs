@@ -22,4 +22,5 @@ pub enum LazyType {
     True,
     False,
     Link,
+    Array,
 }
