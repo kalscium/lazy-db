@@ -1,6 +1,6 @@
 [package]
 name = "lazy-db"
-version = "1.5.1"
+version = "1.5.2"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 description = "A simple, bare-bones and lazily loaded database for small projects"

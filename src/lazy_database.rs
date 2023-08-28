@@ -43,17 +43,22 @@ macro_rules! write_database {
         Result::<(), LDBError>::Ok(())
     })()};
 
-    (($ldb:expr) /$($($con:ident)?$(($can:expr))?)/ *::$($item:ident)?$(($obj:expr))? = $func:ident($value:expr)) => {(|| {
+    (($ldb:expr) /$($($con:ident)?$(($can:expr))?)/ *) => {(|| {
         let database = &$ldb;
         let mut container = database.as_container()?;
         $({
             let con = $(stringify!($con))?$($can)?;
             container = match container.read_container(con) {
                 Ok(x) => x,
-                Err(LDBError::DirNotFound(_)) => container.new_container(con)?,
+                Err(LDBError::DirNotFound(_)) => container.child_container(con)?,
                 Err(e) => return Err(e),
             }
         };)*
+        Ok(container)
+    })()};
+
+    (($ldb:expr) /$($($con:ident)?$(($can:expr))?)/ *::$($item:ident)?$(($obj:expr))? = $func:ident($value:expr)) => {(|| {
+        let mut container = write_database!(($ldb) /$($($con)?$(($can))?)/ *)?;
 
         $(LazyData::$func(container.data_writer(stringify!($item))?, $value)?;)?
         $(LazyData::$func(container.data_writer($obj)?, $value)?;)?
