@@ -124,13 +124,25 @@ impl LazyContainer {
         LazyContainer::load(path)
     }
 
-    /// Tries to remove item at specified key, if it fails nothing happens
-    pub fn remove(&self, key: impl AsRef<Path>) {
+    /// Tries to remove item at specified key; returns result
+    pub fn remove(&self, key: impl AsRef<Path>) -> Result<(), std::io::Error> {
         let path = self.path.join(key);
         if path.is_dir() {
-            let _ = fs::remove_dir_all(path);
+            fs::remove_dir_all(path)
         } else {
-            let _ = fs::remove_file(path);
+            fs::remove_file(path)
         }
+    }
+
+    /// Tries to wipe container's contents; returns result
+    pub fn wipe(&self) -> Result<(), std::io::Error> {
+        fs::remove_dir_all(&self.path)?;
+        fs::create_dir_all(&self.path)
+    }
+
+    /// Returns a reference to the container's path
+    #[inline]
+    pub fn path(&self) -> &Path {
+        &self.path
     }
 }
