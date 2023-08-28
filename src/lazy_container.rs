@@ -103,8 +103,18 @@ impl LazyContainer {
 
     /// Generates a nested `LazyContainer` within this container
     /// 
-    /// If container already exists it will load it instead
+    /// If container already exists it will **wipe** and **replace** it.
     pub fn new_container(&self, key: impl AsRef<Path>) -> Result<LazyContainer, LDBError> {
+        let path = self.path.join(&key);
+        if path.is_dir() { unwrap_result!((fs::remove_dir_all(&path)) err => LDBError::IOError(err)) }; // If exists wipe it
+        Ok(unwrap_result!((LazyContainer::init(path)) err => LDBError::IOError(err)))
+    }
+
+    /// Gets a nested `LazyContainer` within this container
+    /// 
+    /// If container already exists it will load it
+    /// Otherwise it will initialise a new one
+    pub fn child_container(&self, key: impl AsRef<Path>) -> Result<LazyContainer, LDBError> {
         let path = self.path.join(&key);
         if path.is_dir() { return self.read_container(key) }; // If exists load instead
         Ok(unwrap_result!((LazyContainer::init(path)) err => LDBError::IOError(err)))
