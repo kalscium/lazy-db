@@ -79,5 +79,6 @@ pub fn decompress_file(path: impl AsRef<Path>, out_path: impl AsRef<Path>) -> Re
         out.write_all(&buffer[..bytes_read])?;
     };
 
+    out.flush()?;
     Ok(())
 }
